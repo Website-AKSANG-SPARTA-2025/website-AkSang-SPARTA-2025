@@ -1,0 +1,46 @@
+import { z } from "zod";
+
+const competitionPathSchema = z.enum(["CTF", "BCC", "CP"]);
+const phoneNumberSchema = z.string().trim().regex(/^\+?[0-9]{8,20}$/);
+
+export const createRsvpSchema = z
+  .object({
+    name: z.string().min(2).max(100),
+    email: z.string().email(),
+  })
+  .strict();
+
+export const confirmRsvpSchema = z.object({}).strict();
+
+export const createWorkshopEnrollmentSchema = z
+  .object({
+    name: z.string().min(2).max(100),
+    email: z.string().email(),
+    competitionPath: competitionPathSchema,
+    phoneNumber: phoneNumberSchema,
+    nim: z.string().min(1).optional(),
+  })
+  .strict();
+
+export const verifyEmailSchema = z.object({
+  token: z.string().min(1),
+});
+
+export const resendVerificationSchema = z
+  .object({
+    email: z.string().email(),
+    purpose: z.enum(["RSVP", "WORKSHOP"]),
+  })
+  .strict();
+
+export const registerWorkshopSchema = z
+  .object({
+    competitionPath: competitionPathSchema,
+    phoneNumber: phoneNumberSchema,
+    nim: z.string().min(1).optional(),
+  })
+  .strict();
+
+export const submissionSchema = z.object({
+  competitionPath: competitionPathSchema,
+});
