@@ -1,4 +1,4 @@
-import prisma from '../lib/prisma';
+import { prisma } from '../lib/prisma';
 import { Participant, Prisma } from '@/generated/prisma/client';
 
 export async function findOrCreateParticipant(input: { name: string; email: string }) {
