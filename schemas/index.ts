@@ -1,16 +1,9 @@
 import { z } from "zod";
 
+export * from "./rsvp.schema";
+
 const competitionPathSchema = z.enum(["CTF", "BCC", "CP"]);
 const phoneNumberSchema = z.string().trim().regex(/^\+?[0-9]{8,20}$/);
-
-export const createRsvpSchema = z
-  .object({
-    name: z.string().min(2).max(100),
-    email: z.string().email(),
-  })
-  .strict();
-
-export const confirmRsvpSchema = z.object({}).strict();
 
 export const createWorkshopEnrollmentSchema = z
   .object({
