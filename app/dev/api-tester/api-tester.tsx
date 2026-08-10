@@ -35,6 +35,10 @@ export default function ApiTester() {
   });
   const [resendEmail, setResendEmail] = useState("ada@example.com");
   const [resendPurpose, setResendPurpose] = useState<VerificationPurpose>("ATTENDANCE");
+  const [developmentSession, setDevelopmentSession] = useState({
+    email: "ada@example.com",
+    secret: "",
+  });
   const [submissionPath, setSubmissionPath] = useState<CompetitionPath>("CTF");
   const [submissionFile, setSubmissionFile] = useState<File | null>(null);
   const [pending, setPending] = useState<string | null>(null);
@@ -115,12 +119,31 @@ export default function ApiTester() {
       </header>
 
       <section className="rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950">
-        <strong>Session limitation:</strong> Aegis verification does not issue a browser session in
-        this backend yet. Public routes can be tested fully; session-required actions commonly
-        return 401 in a fresh browser. This page intentionally does not bypass that limit.
+        <strong>Session testing:</strong> Aegis verification does not issue a browser session in
+        this backend. The development form below creates a local session only for an already
+        verified participant and is unavailable in production.
       </section>
 
       <div className="grid gap-6 lg:grid-cols-2">
+        <section className="space-y-4 rounded border border-zinc-200 p-4">
+          <div>
+            <h2 className="font-semibold">Development session</h2>
+            <p className="text-sm text-zinc-600">POST /api/dev/auth/session</p>
+          </div>
+          <label className="block text-sm font-medium">
+            Verified participant email
+            <input className={inputClassName} type="email" value={developmentSession.email} onChange={(event) => setDevelopmentSession({ ...developmentSession, email: event.target.value })} />
+          </label>
+          <label className="block text-sm font-medium">
+            Development auth secret
+            <input className={inputClassName} type="password" autoComplete="off" value={developmentSession.secret} onChange={(event) => setDevelopmentSession({ ...developmentSession, secret: event.target.value })} />
+          </label>
+          <p className="text-sm text-zinc-600">Use only on a trusted local network. The secret is not stored or returned.</p>
+          <button className={buttonClassName} disabled={busy || !developmentSession.secret} onClick={() => void jsonRequest("POST /api/dev/auth/session", "/api/dev/auth/session", developmentSession)}>
+            {pending === "POST /api/dev/auth/session" ? "Creatingâ€¦" : "POST /api/dev/auth/session"}
+          </button>
+        </section>
+
         <section className="space-y-4 rounded border border-zinc-200 p-4">
           <div>
             <h2 className="font-semibold">Attendance</h2>

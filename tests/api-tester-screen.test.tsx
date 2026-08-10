@@ -7,6 +7,7 @@ describe("development API tester screen", () => {
   it("renders every route action and the session limitation", () => {
     const html = renderToStaticMarkup(<ApiTester />);
 
+    expect(html).toContain("POST /api/dev/auth/session");
     expect(html).toContain("POST /api/attendances");
     expect(html).toContain("POST /api/attendances/confirm");
     expect(html).toContain("POST /api/verifications/resend");

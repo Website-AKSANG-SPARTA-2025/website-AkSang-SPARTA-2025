@@ -40,6 +40,13 @@ export const resendVerificationSchema = z
   })
   .strict();
 
+export const developmentSessionSchema = z
+  .object({
+    email: z.string().email(),
+    secret: z.string().min(1),
+  })
+  .strict();
+
 export const registerWorkshopSchema = z
   .object({
     competitionPath: competitionPathSchema,
