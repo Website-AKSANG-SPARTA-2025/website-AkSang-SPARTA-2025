@@ -10,7 +10,6 @@ import {
   registerWorkshopSchema,
   resendVerificationSchema,
   submissionSchema,
-  verifyEmailSchema,
 } from "../schemas";
 
 describe("BE-02 request schemas", () => {
@@ -65,11 +64,6 @@ describe("BE-02 request schemas", () => {
     ["invalid phone", { name: "Grace Hopper", email: "grace@example.com", competitionPath: "CP", phoneNumber: "0812-345" }],
   ])("rejects workshop enrollment with %s", (_case, payload) => {
     expect(createWorkshopEnrollmentSchema.safeParse(payload).success).toBe(false);
-  });
-
-  it("requires a non-empty verification token", () => {
-    expect(verifyEmailSchema.safeParse({ token: "token-value" }).success).toBe(true);
-    expect(verifyEmailSchema.safeParse({ token: "" }).success).toBe(false);
   });
 
   it("accepts only valid resend identity and purpose", () => {

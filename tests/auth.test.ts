@@ -7,7 +7,7 @@ vi.mock("../lib/prisma", () => ({
   getPrisma: () => ({ participant: { findUnique } }),
 }));
 
-import { requireVerifiedParticipant } from "../lib/auth";
+import { requireParticipant, requireVerifiedParticipant } from "../lib/auth";
 import { createParticipantSession } from "../lib/session";
 
 const originalSecret = process.env.SESSION_SECRET;
@@ -35,6 +35,15 @@ afterEach(() => {
 });
 
 describe("verified participant resolution", () => {
+  it("resolves a valid signed session before email verification", async () => {
+    const token = await createParticipantSession("participant-1");
+    const unverified = { id: "participant-1", emailVerifiedAt: null };
+    participant = unverified;
+
+    await expect(requireParticipant(requestWithToken(token))).resolves.toBe(unverified);
+    expect(findUnique).toHaveBeenCalledWith({ where: { id: "participant-1" } });
+  });
+
   it("rejects absent and tampered sessions", async () => {
     await expect(requireVerifiedParticipant(requestWithToken())).rejects.toMatchObject({ status: 401 });
 

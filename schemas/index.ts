@@ -33,10 +33,6 @@ export const createWorkshopEnrollmentSchema = z
   })
   .strict();
 
-export const verifyEmailSchema = z.object({
-  token: z.string().min(1),
-});
-
 export const resendVerificationSchema = z
   .object({
     email: z.string().email(),
