@@ -60,9 +60,9 @@ describe("BE-06B POST /api/rsvps/confirm", () => {
       emailVerifiedAt: new Date("2026-08-09T00:00:00Z"),
     });
     confirmRsvpForVerifiedParticipantMock.mockResolvedValue({
-      id: "rsvp-1",
-      participantId: "participant-1",
+      rsvpId: "rsvp-1",
       status: "VERIFIED",
+      created: true,
     });
 
     const response = await POST(buildRequest({}));

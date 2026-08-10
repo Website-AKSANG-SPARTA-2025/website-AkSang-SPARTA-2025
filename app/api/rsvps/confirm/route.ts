@@ -10,7 +10,7 @@ export async function POST(request: Request): Promise<Response> {
     const rsvp = await confirmRsvpForVerifiedParticipant(participant.id);
 
     return successResponse(
-      { rsvpId: rsvp.id, status: rsvp.status },
+      { rsvpId: rsvp.rsvpId, status: rsvp.status },
       "RSVP confirmed",
       { status: 201 },
     );
