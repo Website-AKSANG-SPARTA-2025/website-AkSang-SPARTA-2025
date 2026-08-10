@@ -28,11 +28,6 @@ export type Participant = Prisma.ParticipantModel
  */
 export type Attendance = Prisma.AttendanceModel
 /**
- * Model EmailVerification
- * 
- */
-export type EmailVerification = Prisma.EmailVerificationModel
-/**
  * Model WorkshopRegistration
  * 
  */

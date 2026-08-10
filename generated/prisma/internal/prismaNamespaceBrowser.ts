@@ -53,7 +53,6 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   Participant: 'Participant',
   Attendance: 'Attendance',
-  EmailVerification: 'EmailVerification',
   WorkshopRegistration: 'WorkshopRegistration',
   Submission: 'Submission'
 } as const
@@ -97,19 +96,6 @@ export const AttendanceScalarFieldEnum = {
 } as const
 
 export type AttendanceScalarFieldEnum = (typeof AttendanceScalarFieldEnum)[keyof typeof AttendanceScalarFieldEnum]
-
-
-export const EmailVerificationScalarFieldEnum = {
-  id: 'id',
-  participantId: 'participantId',
-  tokenHash: 'tokenHash',
-  expiresAt: 'expiresAt',
-  verifiedAt: 'verifiedAt',
-  purpose: 'purpose',
-  createdAt: 'createdAt'
-} as const
-
-export type EmailVerificationScalarFieldEnum = (typeof EmailVerificationScalarFieldEnum)[keyof typeof EmailVerificationScalarFieldEnum]
 
 
 export const WorkshopRegistrationScalarFieldEnum = {

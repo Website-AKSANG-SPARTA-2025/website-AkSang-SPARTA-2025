@@ -149,6 +149,7 @@ describe("attendance entry services", () => {
       attendeeType: "STUDENT",
       institution: "Bina Nusantara",
     });
+    expect(result.participant.emailVerifiedAt).toBeNull();
   });
 
   it("returns a pending duplicate without overwriting its classification", async () => {

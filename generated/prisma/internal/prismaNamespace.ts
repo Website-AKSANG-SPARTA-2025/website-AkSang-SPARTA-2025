@@ -399,7 +399,6 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 export const ModelName = {
   Participant: 'Participant',
   Attendance: 'Attendance',
-  EmailVerification: 'EmailVerification',
   WorkshopRegistration: 'WorkshopRegistration',
   Submission: 'Submission'
 } as const
@@ -417,7 +416,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "participant" | "attendance" | "emailVerification" | "workshopRegistration" | "submission"
+    modelProps: "participant" | "attendance" | "workshopRegistration" | "submission"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -566,80 +565,6 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.AttendanceCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.AttendanceCountAggregateOutputType> | number
-        }
-      }
-    }
-    EmailVerification: {
-      payload: Prisma.$EmailVerificationPayload<ExtArgs>
-      fields: Prisma.EmailVerificationFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.EmailVerificationFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailVerificationPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.EmailVerificationFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailVerificationPayload>
-        }
-        findFirst: {
-          args: Prisma.EmailVerificationFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailVerificationPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.EmailVerificationFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailVerificationPayload>
-        }
-        findMany: {
-          args: Prisma.EmailVerificationFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailVerificationPayload>[]
-        }
-        create: {
-          args: Prisma.EmailVerificationCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailVerificationPayload>
-        }
-        createMany: {
-          args: Prisma.EmailVerificationCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.EmailVerificationCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailVerificationPayload>[]
-        }
-        delete: {
-          args: Prisma.EmailVerificationDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailVerificationPayload>
-        }
-        update: {
-          args: Prisma.EmailVerificationUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailVerificationPayload>
-        }
-        deleteMany: {
-          args: Prisma.EmailVerificationDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.EmailVerificationUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.EmailVerificationUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailVerificationPayload>[]
-        }
-        upsert: {
-          args: Prisma.EmailVerificationUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailVerificationPayload>
-        }
-        aggregate: {
-          args: Prisma.EmailVerificationAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateEmailVerification>
-        }
-        groupBy: {
-          args: Prisma.EmailVerificationGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.EmailVerificationGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.EmailVerificationCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.EmailVerificationCountAggregateOutputType> | number
         }
       }
     }
@@ -855,19 +780,6 @@ export const AttendanceScalarFieldEnum = {
 export type AttendanceScalarFieldEnum = (typeof AttendanceScalarFieldEnum)[keyof typeof AttendanceScalarFieldEnum]
 
 
-export const EmailVerificationScalarFieldEnum = {
-  id: 'id',
-  participantId: 'participantId',
-  tokenHash: 'tokenHash',
-  expiresAt: 'expiresAt',
-  verifiedAt: 'verifiedAt',
-  purpose: 'purpose',
-  createdAt: 'createdAt'
-} as const
-
-export type EmailVerificationScalarFieldEnum = (typeof EmailVerificationScalarFieldEnum)[keyof typeof EmailVerificationScalarFieldEnum]
-
-
 export const WorkshopRegistrationScalarFieldEnum = {
   id: 'id',
   participantId: 'participantId',
@@ -979,20 +891,6 @@ export type EnumAttendeeTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$Pri
  * Reference to a field of type 'AttendeeType[]'
  */
 export type ListEnumAttendeeTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AttendeeType[]'>
-    
-
-
-/**
- * Reference to a field of type 'VerificationPurpose'
- */
-export type EnumVerificationPurposeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'VerificationPurpose'>
-    
-
-
-/**
- * Reference to a field of type 'VerificationPurpose[]'
- */
-export type ListEnumVerificationPurposeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'VerificationPurpose[]'>
     
 
 
@@ -1204,7 +1102,6 @@ export type PrismaClientOptions = PrismaClientOptionsWithAccelerateUrl | PrismaC
 export type GlobalOmitConfig = {
   participant?: Prisma.ParticipantOmit
   attendance?: Prisma.AttendanceOmit
-  emailVerification?: Prisma.EmailVerificationOmit
   workshopRegistration?: Prisma.WorkshopRegistrationOmit
   submission?: Prisma.SubmissionOmit
 }

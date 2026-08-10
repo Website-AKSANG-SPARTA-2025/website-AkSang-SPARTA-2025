@@ -40,11 +40,3 @@ export const WorkshopRegistrationStatus = {
 } as const
 
 export type WorkshopRegistrationStatus = (typeof WorkshopRegistrationStatus)[keyof typeof WorkshopRegistrationStatus]
-
-
-export const VerificationPurpose = {
-  ATTENDANCE: 'ATTENDANCE',
-  WORKSHOP: 'WORKSHOP'
-} as const
-
-export type VerificationPurpose = (typeof VerificationPurpose)[keyof typeof VerificationPurpose]

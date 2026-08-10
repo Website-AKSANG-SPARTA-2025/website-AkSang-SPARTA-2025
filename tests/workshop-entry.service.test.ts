@@ -110,6 +110,7 @@ describe("public workshop entry service", () => {
       phoneNumber: "+62812345678",
       nim: "12345678",
     });
+    expect(result.participant.emailVerifiedAt).toBeNull();
     expect(prisma.attendanceCreates).toBe(0);
   });
 

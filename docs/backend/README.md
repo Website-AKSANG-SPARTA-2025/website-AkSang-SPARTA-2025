@@ -28,16 +28,16 @@ flowchart TB
 
     choice --> AttendanceForm["Attendance: nama, email, attendeeType, institution untuk STUDENT"]
     AttendanceForm --> AttendancePending["Attendance berstatus PENDING"]
-    AttendancePending --> AttendanceLink["Magic link tujuan ATTENDANCE"]
-    AttendanceLink --> AttendanceSession["Participant terverifikasi dan session dibuat"]
+    AttendancePending --> AttendanceLink["Aegis mengirim email verifikasi"]
+    AttendanceLink --> AttendanceSession["Status lokal disinkronkan dari Aegis"]
     AttendanceSession --> event["Attendance terkonfirmasi"]
     AttendanceSession --> AttendanceWorkshop["Klik CTF, BCC, atau CP + nomor HP wajib + NIM opsional"]
     AttendanceWorkshop --> AttendanceActive["WorkshopRegistration ACTIVE"]
 
     choice --> workshopForm["Klik CTF, BCC, atau CP + nama, email, nomor HP wajib, NIM opsional"]
     workshopForm --> workshopPending["WorkshopRegistration PENDING"]
-    workshopPending --> workshopLink["Magic link tujuan WORKSHOP"]
-    workshopLink --> workshopActive["WorkshopRegistration ACTIVE + session dibuat"]
+    workshopPending --> workshopLink["Aegis mengirim email verifikasi"]
+    workshopLink --> workshopActive["WorkshopRegistration ACTIVE setelah sinkronisasi"]
 
     AttendanceActive --> protectedAccess["Video, invitation card, dan submission terlindungi"]
     workshopActive --> protectedAccess
@@ -65,7 +65,7 @@ flowchart LR
         schemas["Zod schemas"]
         services["Services"]
         session["Session helper"]
-        notifications["Notification Service"]
+        verification["Aegis verification adapter"]
         storage["R2 storage helper"]
     end
 
@@ -76,7 +76,7 @@ flowchart LR
     end
 
     subgraph externalLayer["External provider"]
-        resend["Resend"]
+        aegis["Aegis Verification API"]
     end
 
     browser -->|"Same-origin request"| routes
@@ -85,8 +85,8 @@ flowchart LR
     routes -->|"Call business rule"| services
     services -->|"Read and write data"| prisma
     prisma --> database
-    services -->|"Send verification email"| notifications
-    notifications -.->|"Deliver email"| resend
+    services -->|"Send/check verification"| verification
+    verification -.->|"Server-side API call"| aegis
     services -->|"Upload or delete PDF"| storage
     storage -.->|"Store bytes"| r2
 ```
@@ -98,8 +98,8 @@ controller HTTP. Route Handler menerima request, memvalidasi input, membaca
 session, memanggil service, lalu mengembalikan JSON, redirect, atau cookie.
 
 Service menyimpan aturan bisnis yang dapat dipakai ulang, misalnya membuat
-Attendance, memverifikasi token, mencari workshop registration, atau menyimpan
-submission. Menambahkan controller terpisah saat ini hanya akan menghasilkan
+Attendance, menyinkronkan status Aegis, mencari workshop registration, atau
+menyimpan submission. Menambahkan controller terpisah saat ini hanya akan menghasilkan
 lapisan tambahan tanpa tanggung jawab baru:
 
 ```text
@@ -113,10 +113,10 @@ baru tanpa persetujuan Backend Lead.
 
 | Lapisan | Tanggung jawab | Contoh yang tidak boleh dilakukan |
 |---|---|---|
-| Route Handler | Parsing HTTP, validasi, session resolution, status/JSON/redirect/cookie | Menulis aturan Attendance atau langsung memanggil Resend/R2 |
+| Route Handler | Parsing HTTP, validasi, session resolution, status/JSON/cookie | Menulis aturan Attendance atau langsung memanggil Aegis/R2 |
 | Zod schema | Memastikan bentuk request valid | Menentukan peserta boleh akses workshop atau tidak |
 | Service | Aturan bisnis dan orkestrasi | Mengakses raw HTTP request atau environment variable provider |
-| `lib/` | Prisma, session signing, email, R2, environment | Menentukan kebijakan peserta/Attendance |
+| `lib/` | Prisma, session signing, Aegis, R2, environment | Menentukan kebijakan peserta/Attendance |
 | Prisma | Model, migration, unique constraint, relasi | Mengatur response API |
 
 Contoh alur sebuah request terlindungi:
@@ -144,7 +144,7 @@ identitas dari session yang sudah diverifikasi.
 |---|---|
 | `Participant` | Satu sumber identitas: nama, email yang dinormalisasi, dan status verifikasi email. |
 | `Attendance` | Status kehadiran offline: `PENDING` atau `VERIFIED`, dengan `attendeeType` `STUDENT`/`PUBLIC`; `STUDENT` wajib memiliki `institution`. Maksimal satu untuk setiap participant. |
-| `EmailVerification` | Token magic link sekali pakai, memiliki expiry dan tujuan `ATTENDANCE` atau `WORKSHOP`. Hanya hash token yang disimpan. |
+| Aegis verification | Token, expiry, dan link sekali pakai dikelola external Aegis; aplikasi tidak menyimpan token verifikasi lokal. |
 | `WorkshopRegistration` | Satu pilihan path (`CTF`/`BCC`/`CP`), nomor HP wajib, NIM opsional, dan status `PENDING` atau `ACTIVE`. Hanya `ACTIVE` yang memberi akses terlindungi. |
 | `Submission` | Metadata PDF yang tersimpan di PostgreSQL; file PDF-nya sendiri berada di Cloudflare R2. |
 
@@ -157,11 +157,27 @@ Jangan menambah atau mengganti endpoint tanpa persetujuan.
 | `POST /api/attendances` | Membuat atau memakai ulang participant dan Attendance pending dengan klasifikasi peserta | Tidak |
 | `POST /api/attendances/confirm` | Membuat/mempromosikan Attendance melalui session verified dengan klasifikasi yang cocok | Ya |
 | `POST /api/workshops/enroll` | Mendaftarkan peserta baru ke satu path workshop dan membuat registration `PENDING` | Tidak |
-| `GET /api/verifications/verify?token=...` | Mengonsumsi magic link dan membuat session | Tidak |
-| `POST /api/verifications/resend` | Mengirim magic link baru sesuai purpose | Tidak |
+| `GET /api/verifications/status` | Mengecek/sinkronkan status Aegis untuk participant dari session | Ya |
+| `POST /api/verifications/resend` | Meminta Aegis mengirim link baru sesuai purpose | Tidak |
 | `POST /api/workshops/register` | Mendaftarkan peserta bersession ke satu path sebagai `ACTIVE` | Ya |
 | `GET /api/workshops/invitation` | Redirect aman ke grup path yang tersimpan | Ya, dan harus memiliki registration `ACTIVE` |
 | `POST /api/submissions` | Upload PDF kompetisi/assignment | Ya, dan harus memiliki registration `ACTIVE` |
+
+### Aegis email verification
+
+`POST /api/attendances`, `POST /api/workshops/enroll`, dan
+`POST /api/verifications/resend` meminta Aegis mengirim email melalui endpoint
+server-side `POST /api/verification`. Aegis sepenuhnya memiliki link
+`/verify?token=...`; aplikasi ini tidak membuat, menyimpan, atau menerima token
+tersebut. Ketika Aegis melaporkan `verified` atau `already_verified`, database
+lokal menyimpan timestamp dari Aegis dan mempromosikan record lokal yang masih
+`PENDING`.
+
+`GET /api/verifications/status` hanya memakai participant dari signed session;
+query email diabaikan. Repository saat ini tidak memiliki login maupun callback
+Aegis yang mengikat browser pemilik email ke session baru. Sebelum UX session
+pasca-verifikasi dipakai di production, konfigurasi Aegis memerlukan callback
+bertanda tangan/satu-kali-pakai atau aplikasi memerlukan login terpisah.
 
 Semua response JSON mengikuti bentuk berikut:
 
@@ -265,10 +281,8 @@ Variable lain diisi sesuai task:
 | Variable | Digunakan oleh | Keterangan |
 |---|---|---|
 | `DATABASE_URL` | BE-03, BE-04, BE-06, BE-07, BE-10 | PostgreSQL lokal; wajib untuk alur database. |
-| `APP_BASE_URL` | BE-04, BE-05 | Gunakan `http://localhost:3000` saat lokal. |
-| `EMAIL_VERIFICATION_*` | BE-04 | TTL dan cooldown verification link. |
 | `SESSION_SECRET`, `SESSION_TTL_DAYS` | BE-06 | Secret minimal 32 random bytes. |
-| `RESEND_API_KEY`, `EMAIL_FROM` | BE-05 | Hanya diperlukan untuk manual integration test email. |
+| `AEGIS_VERIFICATION_BASE_URL`, `AEGIS_VERIFICATION_API_KEY` | Aegis verification | Base URL Aegis dan API key server-only opsional. |
 | `WORKSHOP_*_COMMUNITY_LINK` | BE-08 | Tiga URL private untuk CTF, BCC, dan CP. |
 | `R2_*`, `MAX_SUBMISSION_FILE_SIZE_BYTES` | BE-09, BE-10 | Bucket private khusus development. |
 
@@ -344,7 +358,7 @@ npm run build
 ```
 
 `npm run build` harus berhasil sebelum merge. Test provider harus memakai fake
-atau mock; jangan kirim email Resend atau upload ke R2 sungguhan dari test.
+atau mock; jangan memanggil Aegis production atau upload ke R2 sungguhan dari test.
 
 ## Struktur proyek yang dituju
 
@@ -355,7 +369,7 @@ Struktur ini adalah target Sprint 1. Jangan memindahkan aplikasi ke folder
 app/api/                 Route Handlers HTTP
 services/                Aturan bisnis dan orkestrasi
 schemas/                 Validasi Zod
-lib/                     Prisma, session, email, R2, dan environment
+lib/                     Prisma, session, Aegis, R2, dan environment
 errors/                  ApplicationError dan HTTP error mapping
 prisma/                  Schema dan migration
 tests/                   Unit/integration tests dengan fake provider

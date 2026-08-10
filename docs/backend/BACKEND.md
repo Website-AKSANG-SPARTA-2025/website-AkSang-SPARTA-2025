@@ -40,6 +40,32 @@ Never reinterpret a lower-priority source to override a higher-priority contract
 
 ---
 
+# 2A. Aegis Verification Migration Override (2026-08-11)
+
+The approved Aegis migration supersedes every earlier reference in this document
+to a local `EmailVerification` record, local raw/hash verification token,
+`GET /api/verifications/verify`, verification-link TTL/cooldown environment
+variables, Resend, `RESEND_API_KEY`, `EMAIL_FROM`, and a local verification
+email template. Those older sections remain only as Sprint 1 history.
+
+Current contract:
+
+- Aegis owns `POST /api/verification`, `GET /api/verification?email=...`, and
+  its external `/verify?token=...` link.
+- The application calls Aegis only from `lib/aegis-verification.ts`; an optional
+  `AEGIS_VERIFICATION_API_KEY` is sent server-side as `x-api-key`.
+- `Participant.emailVerifiedAt` remains the application authorization source.
+  A verified Aegis result atomically updates that field with Aegis's timestamp
+  and promotes pending Attendance/WorkshopRegistration records.
+- `GET /api/verifications/status` resolves the participant from an existing
+  signed session and never accepts an arbitrary client email. It skips Aegis
+  when the local participant is already verified.
+- The supplied Aegis API has no signed callback/return contract. Do not mint a
+  session from a public registration email alone; that would allow someone who
+  registered a victim email to claim the account after external verification.
+
+---
+
 # 3. Project Purpose
 
 SPARTA Event Platform supports three independent-but-connected journeys:
@@ -132,13 +158,13 @@ A participant has at most one Attendance in the current scope.
 Every Attendance records an `attendeeType` of `STUDENT` or `PUBLIC`. A student
 must also provide a non-empty `institution`; the field is optional for the public.
 
-## EmailVerification
+## Aegis Verification
 
-A one-time, expiring verification-token record for either `ATTENDANCE` or `WORKSHOP`.
-
-The database stores only a hash of the raw token.
-
-Its `purpose` determines the post-verification redirect and whether a pending Attendance becomes `VERIFIED`.
+Aegis owns the one-time, expiring verification token and email link. PostgreSQL
+does not store a verification token/hash or purpose-specific verification
+record. When Aegis reports an email verified, the application stores its
+`verifiedAt` timestamp on `Participant.emailVerifiedAt` and promotes relevant
+pending local records atomically.
 
 ## Verified Session
 
@@ -1517,20 +1543,14 @@ All secrets are server-only.
 # Database
 DATABASE_URL=
 
-# Public application base used to build verification links
-APP_BASE_URL=
-
-# Verification defaults
-EMAIL_VERIFICATION_TTL_MINUTES=15
-EMAIL_VERIFICATION_RESEND_COOLDOWN_SECONDS=60
+# Aegis email verification (server-only)
+AEGIS_VERIFICATION_BASE_URL=https://aegis-api.i-jer.com
+# Empty unless Aegis requires x-api-key.
+AEGIS_VERIFICATION_API_KEY=
 
 # Signed participant session
 SESSION_SECRET=
 SESSION_TTL_DAYS=7
-
-# Verification email provider (Resend)
-RESEND_API_KEY=
-EMAIL_FROM=
 
 # Workshop invitation: one server-only URL per allowed path
 WORKSHOP_CTF_COMMUNITY_LINK=

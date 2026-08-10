@@ -28,11 +28,6 @@ enum WorkshopRegistrationStatus {
   ACTIVE
 }
 
-enum VerificationPurpose {
-  ATTENDANCE
-  WORKSHOP
-}
-
 model Participant {
   id              String    @id @default(cuid())
   name            String
@@ -40,7 +35,6 @@ model Participant {
   emailVerifiedAt DateTime?
 
   attendance           Attendance?
-  verifications        EmailVerification[]
   workshopRegistration WorkshopRegistration?
 
   createdAt DateTime @default(now())
@@ -58,21 +52,6 @@ model Attendance {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-}
-
-model EmailVerification {
-  id            String              @id @default(cuid())
-  participantId String
-  tokenHash     String              @unique
-  expiresAt     DateTime
-  verifiedAt    DateTime?
-  purpose       VerificationPurpose
-  createdAt     DateTime            @default(now())
-
-  participant Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
-
-  @@index([participantId, purpose, createdAt])
-  @@index([expiresAt])
 }
 
 model WorkshopRegistration {
