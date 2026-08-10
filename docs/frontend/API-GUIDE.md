@@ -58,9 +58,9 @@ Errors always contain `success: false` and `message`. Validation errors may also
 
 | Method and path | JSON/form input | Success result | Session requirement |
 | --- | --- | --- | --- |
-| `POST /api/attendances` | JSON: `name` (2–100 chars), `email`, `attendeeType` (`STUDENT` or `PUBLIC`), optional trimmed `institution` (required for `STUDENT`) | `202` pending email: `{ attendanceId, status: "PENDING" }`; an already-verified email returns `{ attendanceId, status: "VERIFIED", verifiedAt }` | None |
+| `POST /api/attendances` | JSON: `name` (2–100 chars), `email`, `attendeeType` (`STUDENT` or `PUBLIC`), optional trimmed `institution` (required for `STUDENT`) | `202` pending email: `{ attendanceId, status: "PENDING" }`; if a new row is created for an Aegis-verified participant, `{ attendanceId, status: "VERIFIED", verifiedAt }` | None |
 | `POST /api/attendances/confirm` | JSON: `attendeeType`, optional trimmed `institution` (required for `STUDENT`) | `200` promoted or `201` created: `{ attendanceId, status: "VERIFIED" }` | Verified participant session |
-| `POST /api/workshops/enroll` | JSON: `name` (2–100 chars), `email`, `competitionPath` (`CTF`, `BCC`, `CP`), `phoneNumber` (8–20 digits, optional leading `+`), optional `nim` | `202` pending email: `{ status: "PENDING", competitionPath }`; an already-verified email returns `{ status: "ACTIVE", competitionPath, verifiedAt }` | None |
+| `POST /api/workshops/enroll` | JSON: `name` (2–100 chars), `email`, `competitionPath` (`CTF`, `BCC`, `CP`), `phoneNumber` (8–20 digits, optional leading `+`), optional `nim` | `202` pending email: `{ status: "PENDING", competitionPath }`; if a new row is created for an Aegis-verified participant, `{ status: "ACTIVE", competitionPath, verifiedAt }` | None |
 | `POST /api/workshops/register` | JSON: `competitionPath`, `phoneNumber`, optional `nim` | `201`: `{ id, competitionPath, invitationAvailable: true }` | Verified participant session |
 | `GET /api/workshops/invitation` | None | `302` redirect to the configured community link | Verified participant session with an `ACTIVE` registration |
 | `GET /api/verifications/status` | None | `{ verified, status, ... }`; status is `verified`, `not_verified`, or `not_registered` | Participant session |
