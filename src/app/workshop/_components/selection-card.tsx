@@ -1,4 +1,9 @@
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/cn";
+
+const SURFACE = "bg-[#7c7a9e]"; // matching the purple palette
+const BOX = "bg-[#c9c9d2] text-[#4a4470]";
+const ACTION = "bg-[#ece8f3] text-[#4a4470] hover:bg-white";
 
 interface SelectionCardProps {
   option?: string;
@@ -22,9 +27,19 @@ export function SelectionCard({
   const isFull = slot_remaining === 0;
 
   return (
-    <div className="w-full rounded-2xl bg-[#9897A9] p-6 text-white shadow-sm transition-all hover:shadow-md">
+    <div
+      className={cn(
+        "w-full rounded-2xl p-6 text-white shadow-sm transition-all hover:shadow-md",
+        SURFACE,
+      )}
+    >
       <div className="flex items-start justify-between">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#EAEAEA] font-bold text-blue-600 text-xl shadow-sm">
+        <div
+          className={cn(
+            "flex h-10 w-10 items-center justify-center rounded-lg font-bold text-xl shadow-sm",
+            BOX,
+          )}
+        >
           {option}
         </div>
         <div className="font-semibold text-sm mt-1">
@@ -43,7 +58,10 @@ export function SelectionCard({
         <Button
           onClick={onSelect}
           disabled={isFull && !isSelected}
-          className="rounded-full bg-[#64617F] px-8 py-5 text-sm font-semibold text-white hover:bg-[#52506b] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className={cn(
+            "rounded-full px-8 py-5 text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
+            ACTION,
+          )}
         >
           {isSelected ? "Terpilih" : isFull ? "Tidak Tersedia" : "Pilih"}
         </Button>

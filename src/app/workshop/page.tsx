@@ -4,6 +4,10 @@ import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { SelectionCard } from "./_components/selection-card";
+import { FinalisasiPilihanCard } from "./_components/finalisasi-pilihan-card";
+import { cn } from "@/lib/cn";
+
+const SURFACE = "bg-[#5d5a88]";
 
 const competitions = [
   {
@@ -32,12 +36,40 @@ const competitions = [
   },
 ];
 
-// yes this if vibecoded, gomenasai!
+const careerPaths = [
+  {
+    id: "CP1",
+    title: "Cybersecurity",
+    description:
+      "Learn how to protect networks, systems, and programs from digital attacks. Become an expert in finding vulnerabilities and securing infrastructure.",
+    slot_remaining: 100,
+    slot_max: 100,
+  },
+  {
+    id: "CP2",
+    title: "Product Manager",
+    description:
+      "Guide the success of a product and lead the cross-functional team that is responsible for improving it. Bridge the gap between engineering, design, and business.",
+    slot_remaining: 100,
+    slot_max: 100,
+  },
+  {
+    id: "CP3",
+    title: "Software Engineer",
+    description:
+      "Design, develop, and test software applications. Build scalable systems and master the core fundamentals of modern programming.",
+    slot_remaining: 100,
+    slot_max: 100,
+  },
+];
+
+// yes this is vibecoded, gomenasai!
 
 export default function WorkshopPage() {
   const [selectedCompetition, setSelectedCompetition] = useState<string | null>(
     null,
   );
+  const [selectedCareer, setSelectedCareer] = useState<string | null>(null);
 
   const [timeLeft, setTimeLeft] = useState({
     Days: "00",
@@ -104,7 +136,12 @@ export default function WorkshopPage() {
               { label: "Seconds", value: timeLeft.Seconds },
             ].map((item, idx) => (
               <div key={idx} className="flex flex-col items-center space-y-2">
-                <div className="w-16 h-16 md:w-20 md:h-20 bg-[#64617F] text-white rounded-xl md:rounded-2xl flex items-center justify-center text-2xl md:text-3xl font-bold shadow-md">
+                <div
+                  className={cn(
+                    "w-16 h-16 md:w-20 md:h-20 text-white rounded-xl md:rounded-2xl flex items-center justify-center text-2xl md:text-3xl font-bold shadow-md",
+                    SURFACE,
+                  )}
+                >
                   {item.value}
                 </div>
                 <span className="text-xs md:text-sm font-bold text-blue-600">
@@ -114,8 +151,49 @@ export default function WorkshopPage() {
             ))}
           </div>
 
+          {/* Career Path Section */}
+          <div
+            className={cn(
+              "rounded-3xl p-6 md:p-10 text-white shadow-xl",
+              SURFACE,
+            )}
+          >
+            <div className="mb-8">
+              <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
+                Career Path
+              </h2>
+              <p className="text-sm text-white/80 mt-1">
+                Pilih satu career path.
+              </p>
+            </div>
+
+            <div className="space-y-6">
+              {careerPaths.map((career) => (
+                <SelectionCard
+                  key={career.id}
+                  option={career.id.replace("CP", "")}
+                  title={career.title}
+                  description={career.description}
+                  slot_remaining={career.slot_remaining}
+                  slot_max={career.slot_max}
+                  isSelected={selectedCareer === career.id}
+                  onSelect={() =>
+                    setSelectedCareer(
+                      career.id === selectedCareer ? null : career.id,
+                    )
+                  }
+                />
+              ))}
+            </div>
+          </div>
+
           {/* Competition Path Section */}
-          <div className="bg-[#64617F] rounded-3xl p-6 md:p-10 text-white shadow-xl">
+          <div
+            className={cn(
+              "rounded-3xl p-6 md:p-10 text-white shadow-xl",
+              SURFACE,
+            )}
+          >
             <div className="mb-8">
               <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
                 Competition Path
@@ -146,6 +224,9 @@ export default function WorkshopPage() {
           </div>
 
           {/* Finalisasi section */}
+          <FinalisasiPilihanCard
+            subtitle={`Career: ${selectedCareer ? careerPaths.find((c) => c.id === selectedCareer)?.title : "Belum memilih"} | Competition: ${selectedCompetition ? competitions.find((c) => c.id === selectedCompetition)?.title : "Belum memilih"}`}
+          />
         </div>
         <Footer />
       </div>
