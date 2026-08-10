@@ -73,6 +73,11 @@ export async function createRsvp(input: {
   email: string;
 }): Promise<CreateRsvpResult> {
   const participant = await findOrCreateParticipant(input);
+  if (!participant) {
+    // findOrCreateParticipant never returns null in a healthy flow; the
+    // lookup after a unique-conflict race always finds the winning row.
+    throw new ApplicationError("INTERNAL_ERROR", 500, "Internal server error");
+  }
   const { rsvp, isNew } = await createOrGetPendingRsvp(participant.id);
   return {
     participantId: participant.id,
