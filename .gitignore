@@ -40,3 +40,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local planning artifacts (never pushed)
+/.omo/
+
+# prisma generated client (regenerated via npm run db:generate)
+/generated/
