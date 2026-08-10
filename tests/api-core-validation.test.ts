@@ -4,8 +4,8 @@ import { describe, expect, it } from "vitest";
 import { ApplicationError } from "../errors/application-error";
 import { errorResponse, parseJsonBody, successResponse } from "../lib/api";
 import {
-  confirmRsvpSchema,
-  createRsvpSchema,
+  confirmAttendanceSchema,
+  createAttendanceSchema,
   createWorkshopEnrollmentSchema,
   registerWorkshopSchema,
   resendVerificationSchema,
@@ -14,19 +14,37 @@ import {
 } from "../schemas";
 
 describe("BE-02 request schemas", () => {
-  it("accepts an RSVP identity and rejects invalid email", () => {
+  it("requires an institution for student attendance and rejects blank public institutions", () => {
     expect(
-      createRsvpSchema.safeParse({ name: "Ada Lovelace", email: "ada@example.com" })
-        .success,
+      createAttendanceSchema.safeParse({
+        name: "Ada Lovelace",
+        email: "ada@example.com",
+        attendeeType: "STUDENT",
+      }).success,
+    ).toBe(false);
+    expect(
+      createAttendanceSchema.safeParse({
+        name: "Ada Lovelace",
+        email: "ada@example.com",
+        attendeeType: "PUBLIC",
+      }).success,
     ).toBe(true);
     expect(
-      createRsvpSchema.safeParse({ name: "Ada Lovelace", email: "invalid" }).success,
+      createAttendanceSchema.safeParse({
+        name: "Ada Lovelace",
+        email: "ada@example.com",
+        attendeeType: "PUBLIC",
+        institution: "   ",
+      }).success,
     ).toBe(false);
   });
 
-  it("accepts only an empty RSVP confirmation body", () => {
-    expect(confirmRsvpSchema.safeParse({}).success).toBe(true);
-    expect(confirmRsvpSchema.safeParse({ participantId: "hidden" }).success).toBe(false);
+  it("accepts attendance confirmation data without forged identity", () => {
+    expect(confirmAttendanceSchema.safeParse({ attendeeType: "PUBLIC" }).success).toBe(true);
+    expect(
+      confirmAttendanceSchema.safeParse({ attendeeType: "PUBLIC", participantId: "forged" })
+        .success,
+    ).toBe(false);
   });
 
   it("accepts full workshop enrollment identity and contact data", () => {
@@ -56,7 +74,7 @@ describe("BE-02 request schemas", () => {
 
   it("accepts only valid resend identity and purpose", () => {
     expect(
-      resendVerificationSchema.safeParse({ email: "ada@example.com", purpose: "RSVP" })
+      resendVerificationSchema.safeParse({ email: "ada@example.com", purpose: "ATTENDANCE" })
         .success,
     ).toBe(true);
     expect(
@@ -130,7 +148,11 @@ describe("BE-02 API response contract", () => {
   );
 
   it("maps Zod errors to a detailed validation response", async () => {
-    const validation = createRsvpSchema.safeParse({ name: "A", email: "invalid" });
+    const validation = createAttendanceSchema.safeParse({
+      name: "A",
+      email: "invalid",
+      attendeeType: "PUBLIC",
+    });
     expect(validation.success).toBe(false);
     if (validation.success) return;
 
@@ -157,34 +179,39 @@ describe("BE-02 API response contract", () => {
 
 describe("BE-02 JSON request parsing", () => {
   it("parses and validates a JSON request body", async () => {
-    const request = new Request("http://localhost/api/rsvps", {
+    const request = new Request("http://localhost/api/attendances", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ name: "Ada Lovelace", email: "ada@example.com" }),
+      body: JSON.stringify({
+        name: "Ada Lovelace",
+        email: "ada@example.com",
+        attendeeType: "PUBLIC",
+      }),
     });
 
-    await expect(parseJsonBody(request, createRsvpSchema)).resolves.toEqual({
+    await expect(parseJsonBody(request, createAttendanceSchema)).resolves.toEqual({
       name: "Ada Lovelace",
       email: "ada@example.com",
+      attendeeType: "PUBLIC",
     });
   });
 
   it("preserves Zod validation errors for the response mapper", async () => {
-    const request = new Request("http://localhost/api/rsvps", {
+    const request = new Request("http://localhost/api/attendances", {
       method: "POST",
       body: JSON.stringify({ name: "A", email: "invalid" }),
     });
 
-    await expect(parseJsonBody(request, createRsvpSchema)).rejects.toBeInstanceOf(ZodError);
+    await expect(parseJsonBody(request, createAttendanceSchema)).rejects.toBeInstanceOf(ZodError);
   });
 
   it("maps malformed JSON to a validation ApplicationError", async () => {
-    const request = new Request("http://localhost/api/rsvps", {
+    const request = new Request("http://localhost/api/attendances", {
       method: "POST",
       body: "{not-json",
     });
 
-    await expect(parseJsonBody(request, createRsvpSchema)).rejects.toMatchObject({
+    await expect(parseJsonBody(request, createAttendanceSchema)).rejects.toMatchObject({
       code: "VALIDATION_ERROR",
       status: 400,
       message: "Invalid request payload",

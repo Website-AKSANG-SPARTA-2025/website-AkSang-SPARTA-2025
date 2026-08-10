@@ -9,12 +9,20 @@
 * 🟢 You can import this file directly.
 */
 
-export const RsvpStatus = {
+export const AttendanceStatus = {
   PENDING: 'PENDING',
   VERIFIED: 'VERIFIED'
 } as const
 
-export type RsvpStatus = (typeof RsvpStatus)[keyof typeof RsvpStatus]
+export type AttendanceStatus = (typeof AttendanceStatus)[keyof typeof AttendanceStatus]
+
+
+export const AttendeeType = {
+  STUDENT: 'STUDENT',
+  PUBLIC: 'PUBLIC'
+} as const
+
+export type AttendeeType = (typeof AttendeeType)[keyof typeof AttendeeType]
 
 
 export const CompetitionPath = {
@@ -35,7 +43,7 @@ export type WorkshopRegistrationStatus = (typeof WorkshopRegistrationStatus)[key
 
 
 export const VerificationPurpose = {
-  RSVP: 'RSVP',
+  ATTENDANCE: 'ATTENDANCE',
   WORKSHOP: 'WORKSHOP'
 } as const
 

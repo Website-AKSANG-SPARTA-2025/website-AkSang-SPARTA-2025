@@ -7,9 +7,14 @@ datasource db {
   provider = "postgresql"
 }
 
-enum RsvpStatus {
+enum AttendanceStatus {
   PENDING
   VERIFIED
+}
+
+enum AttendeeType {
+  STUDENT
+  PUBLIC
 }
 
 enum CompetitionPath {
@@ -24,7 +29,7 @@ enum WorkshopRegistrationStatus {
 }
 
 enum VerificationPurpose {
-  RSVP
+  ATTENDANCE
   WORKSHOP
 }
 
@@ -34,7 +39,7 @@ model Participant {
   email           String    @unique
   emailVerifiedAt DateTime?
 
-  rsvp                 Rsvp?
+  attendance           Attendance?
   verifications        EmailVerification[]
   workshopRegistration WorkshopRegistration?
 
@@ -42,10 +47,12 @@ model Participant {
   updatedAt DateTime @updatedAt
 }
 
-model Rsvp {
-  id            String     @id @default(cuid())
-  participantId String     @unique
-  status        RsvpStatus @default(PENDING)
+model Attendance {
+  id            String           @id @default(cuid())
+  participantId String           @unique
+  status        AttendanceStatus @default(PENDING)
+  attendeeType  AttendeeType
+  institution   String?
 
   participant Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
 

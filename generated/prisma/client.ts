@@ -47,10 +47,10 @@ export { Prisma }
  */
 export type Participant = Prisma.ParticipantModel
 /**
- * Model Rsvp
+ * Model Attendance
  * 
  */
-export type Rsvp = Prisma.RsvpModel
+export type Attendance = Prisma.AttendanceModel
 /**
  * Model EmailVerification
  * 

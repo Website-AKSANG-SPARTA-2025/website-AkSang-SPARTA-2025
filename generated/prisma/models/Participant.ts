@@ -190,7 +190,7 @@ export type ParticipantWhereInput = {
   emailVerifiedAt?: Prisma.DateTimeNullableFilter<"Participant"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Participant"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Participant"> | Date | string
-  rsvp?: Prisma.XOR<Prisma.RsvpNullableScalarRelationFilter, Prisma.RsvpWhereInput> | null
+  attendance?: Prisma.XOR<Prisma.AttendanceNullableScalarRelationFilter, Prisma.AttendanceWhereInput> | null
   verifications?: Prisma.EmailVerificationListRelationFilter
   workshopRegistration?: Prisma.XOR<Prisma.WorkshopRegistrationNullableScalarRelationFilter, Prisma.WorkshopRegistrationWhereInput> | null
 }
@@ -202,7 +202,7 @@ export type ParticipantOrderByWithRelationInput = {
   emailVerifiedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  rsvp?: Prisma.RsvpOrderByWithRelationInput
+  attendance?: Prisma.AttendanceOrderByWithRelationInput
   verifications?: Prisma.EmailVerificationOrderByRelationAggregateInput
   workshopRegistration?: Prisma.WorkshopRegistrationOrderByWithRelationInput
 }
@@ -217,7 +217,7 @@ export type ParticipantWhereUniqueInput = Prisma.AtLeast<{
   emailVerifiedAt?: Prisma.DateTimeNullableFilter<"Participant"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Participant"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Participant"> | Date | string
-  rsvp?: Prisma.XOR<Prisma.RsvpNullableScalarRelationFilter, Prisma.RsvpWhereInput> | null
+  attendance?: Prisma.XOR<Prisma.AttendanceNullableScalarRelationFilter, Prisma.AttendanceWhereInput> | null
   verifications?: Prisma.EmailVerificationListRelationFilter
   workshopRegistration?: Prisma.XOR<Prisma.WorkshopRegistrationNullableScalarRelationFilter, Prisma.WorkshopRegistrationWhereInput> | null
 }, "id" | "email">
@@ -253,7 +253,7 @@ export type ParticipantCreateInput = {
   emailVerifiedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  rsvp?: Prisma.RsvpCreateNestedOneWithoutParticipantInput
+  attendance?: Prisma.AttendanceCreateNestedOneWithoutParticipantInput
   verifications?: Prisma.EmailVerificationCreateNestedManyWithoutParticipantInput
   workshopRegistration?: Prisma.WorkshopRegistrationCreateNestedOneWithoutParticipantInput
 }
@@ -265,7 +265,7 @@ export type ParticipantUncheckedCreateInput = {
   emailVerifiedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  rsvp?: Prisma.RsvpUncheckedCreateNestedOneWithoutParticipantInput
+  attendance?: Prisma.AttendanceUncheckedCreateNestedOneWithoutParticipantInput
   verifications?: Prisma.EmailVerificationUncheckedCreateNestedManyWithoutParticipantInput
   workshopRegistration?: Prisma.WorkshopRegistrationUncheckedCreateNestedOneWithoutParticipantInput
 }
@@ -277,7 +277,7 @@ export type ParticipantUpdateInput = {
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  rsvp?: Prisma.RsvpUpdateOneWithoutParticipantNestedInput
+  attendance?: Prisma.AttendanceUpdateOneWithoutParticipantNestedInput
   verifications?: Prisma.EmailVerificationUpdateManyWithoutParticipantNestedInput
   workshopRegistration?: Prisma.WorkshopRegistrationUpdateOneWithoutParticipantNestedInput
 }
@@ -289,7 +289,7 @@ export type ParticipantUncheckedUpdateInput = {
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  rsvp?: Prisma.RsvpUncheckedUpdateOneWithoutParticipantNestedInput
+  attendance?: Prisma.AttendanceUncheckedUpdateOneWithoutParticipantNestedInput
   verifications?: Prisma.EmailVerificationUncheckedUpdateManyWithoutParticipantNestedInput
   workshopRegistration?: Prisma.WorkshopRegistrationUncheckedUpdateOneWithoutParticipantNestedInput
 }
@@ -365,18 +365,18 @@ export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
 }
 
-export type ParticipantCreateNestedOneWithoutRsvpInput = {
-  create?: Prisma.XOR<Prisma.ParticipantCreateWithoutRsvpInput, Prisma.ParticipantUncheckedCreateWithoutRsvpInput>
-  connectOrCreate?: Prisma.ParticipantCreateOrConnectWithoutRsvpInput
+export type ParticipantCreateNestedOneWithoutAttendanceInput = {
+  create?: Prisma.XOR<Prisma.ParticipantCreateWithoutAttendanceInput, Prisma.ParticipantUncheckedCreateWithoutAttendanceInput>
+  connectOrCreate?: Prisma.ParticipantCreateOrConnectWithoutAttendanceInput
   connect?: Prisma.ParticipantWhereUniqueInput
 }
 
-export type ParticipantUpdateOneRequiredWithoutRsvpNestedInput = {
-  create?: Prisma.XOR<Prisma.ParticipantCreateWithoutRsvpInput, Prisma.ParticipantUncheckedCreateWithoutRsvpInput>
-  connectOrCreate?: Prisma.ParticipantCreateOrConnectWithoutRsvpInput
-  upsert?: Prisma.ParticipantUpsertWithoutRsvpInput
+export type ParticipantUpdateOneRequiredWithoutAttendanceNestedInput = {
+  create?: Prisma.XOR<Prisma.ParticipantCreateWithoutAttendanceInput, Prisma.ParticipantUncheckedCreateWithoutAttendanceInput>
+  connectOrCreate?: Prisma.ParticipantCreateOrConnectWithoutAttendanceInput
+  upsert?: Prisma.ParticipantUpsertWithoutAttendanceInput
   connect?: Prisma.ParticipantWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.ParticipantUpdateToOneWithWhereWithoutRsvpInput, Prisma.ParticipantUpdateWithoutRsvpInput>, Prisma.ParticipantUncheckedUpdateWithoutRsvpInput>
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ParticipantUpdateToOneWithWhereWithoutAttendanceInput, Prisma.ParticipantUpdateWithoutAttendanceInput>, Prisma.ParticipantUncheckedUpdateWithoutAttendanceInput>
 }
 
 export type ParticipantCreateNestedOneWithoutVerificationsInput = {
@@ -407,7 +407,7 @@ export type ParticipantUpdateOneRequiredWithoutWorkshopRegistrationNestedInput =
   update?: Prisma.XOR<Prisma.XOR<Prisma.ParticipantUpdateToOneWithWhereWithoutWorkshopRegistrationInput, Prisma.ParticipantUpdateWithoutWorkshopRegistrationInput>, Prisma.ParticipantUncheckedUpdateWithoutWorkshopRegistrationInput>
 }
 
-export type ParticipantCreateWithoutRsvpInput = {
+export type ParticipantCreateWithoutAttendanceInput = {
   id?: string
   name: string
   email: string
@@ -418,7 +418,7 @@ export type ParticipantCreateWithoutRsvpInput = {
   workshopRegistration?: Prisma.WorkshopRegistrationCreateNestedOneWithoutParticipantInput
 }
 
-export type ParticipantUncheckedCreateWithoutRsvpInput = {
+export type ParticipantUncheckedCreateWithoutAttendanceInput = {
   id?: string
   name: string
   email: string
@@ -429,23 +429,23 @@ export type ParticipantUncheckedCreateWithoutRsvpInput = {
   workshopRegistration?: Prisma.WorkshopRegistrationUncheckedCreateNestedOneWithoutParticipantInput
 }
 
-export type ParticipantCreateOrConnectWithoutRsvpInput = {
+export type ParticipantCreateOrConnectWithoutAttendanceInput = {
   where: Prisma.ParticipantWhereUniqueInput
-  create: Prisma.XOR<Prisma.ParticipantCreateWithoutRsvpInput, Prisma.ParticipantUncheckedCreateWithoutRsvpInput>
+  create: Prisma.XOR<Prisma.ParticipantCreateWithoutAttendanceInput, Prisma.ParticipantUncheckedCreateWithoutAttendanceInput>
 }
 
-export type ParticipantUpsertWithoutRsvpInput = {
-  update: Prisma.XOR<Prisma.ParticipantUpdateWithoutRsvpInput, Prisma.ParticipantUncheckedUpdateWithoutRsvpInput>
-  create: Prisma.XOR<Prisma.ParticipantCreateWithoutRsvpInput, Prisma.ParticipantUncheckedCreateWithoutRsvpInput>
+export type ParticipantUpsertWithoutAttendanceInput = {
+  update: Prisma.XOR<Prisma.ParticipantUpdateWithoutAttendanceInput, Prisma.ParticipantUncheckedUpdateWithoutAttendanceInput>
+  create: Prisma.XOR<Prisma.ParticipantCreateWithoutAttendanceInput, Prisma.ParticipantUncheckedCreateWithoutAttendanceInput>
   where?: Prisma.ParticipantWhereInput
 }
 
-export type ParticipantUpdateToOneWithWhereWithoutRsvpInput = {
+export type ParticipantUpdateToOneWithWhereWithoutAttendanceInput = {
   where?: Prisma.ParticipantWhereInput
-  data: Prisma.XOR<Prisma.ParticipantUpdateWithoutRsvpInput, Prisma.ParticipantUncheckedUpdateWithoutRsvpInput>
+  data: Prisma.XOR<Prisma.ParticipantUpdateWithoutAttendanceInput, Prisma.ParticipantUncheckedUpdateWithoutAttendanceInput>
 }
 
-export type ParticipantUpdateWithoutRsvpInput = {
+export type ParticipantUpdateWithoutAttendanceInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
@@ -456,7 +456,7 @@ export type ParticipantUpdateWithoutRsvpInput = {
   workshopRegistration?: Prisma.WorkshopRegistrationUpdateOneWithoutParticipantNestedInput
 }
 
-export type ParticipantUncheckedUpdateWithoutRsvpInput = {
+export type ParticipantUncheckedUpdateWithoutAttendanceInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
@@ -474,7 +474,7 @@ export type ParticipantCreateWithoutVerificationsInput = {
   emailVerifiedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  rsvp?: Prisma.RsvpCreateNestedOneWithoutParticipantInput
+  attendance?: Prisma.AttendanceCreateNestedOneWithoutParticipantInput
   workshopRegistration?: Prisma.WorkshopRegistrationCreateNestedOneWithoutParticipantInput
 }
 
@@ -485,7 +485,7 @@ export type ParticipantUncheckedCreateWithoutVerificationsInput = {
   emailVerifiedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  rsvp?: Prisma.RsvpUncheckedCreateNestedOneWithoutParticipantInput
+  attendance?: Prisma.AttendanceUncheckedCreateNestedOneWithoutParticipantInput
   workshopRegistration?: Prisma.WorkshopRegistrationUncheckedCreateNestedOneWithoutParticipantInput
 }
 
@@ -512,7 +512,7 @@ export type ParticipantUpdateWithoutVerificationsInput = {
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  rsvp?: Prisma.RsvpUpdateOneWithoutParticipantNestedInput
+  attendance?: Prisma.AttendanceUpdateOneWithoutParticipantNestedInput
   workshopRegistration?: Prisma.WorkshopRegistrationUpdateOneWithoutParticipantNestedInput
 }
 
@@ -523,7 +523,7 @@ export type ParticipantUncheckedUpdateWithoutVerificationsInput = {
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  rsvp?: Prisma.RsvpUncheckedUpdateOneWithoutParticipantNestedInput
+  attendance?: Prisma.AttendanceUncheckedUpdateOneWithoutParticipantNestedInput
   workshopRegistration?: Prisma.WorkshopRegistrationUncheckedUpdateOneWithoutParticipantNestedInput
 }
 
@@ -534,7 +534,7 @@ export type ParticipantCreateWithoutWorkshopRegistrationInput = {
   emailVerifiedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  rsvp?: Prisma.RsvpCreateNestedOneWithoutParticipantInput
+  attendance?: Prisma.AttendanceCreateNestedOneWithoutParticipantInput
   verifications?: Prisma.EmailVerificationCreateNestedManyWithoutParticipantInput
 }
 
@@ -545,7 +545,7 @@ export type ParticipantUncheckedCreateWithoutWorkshopRegistrationInput = {
   emailVerifiedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  rsvp?: Prisma.RsvpUncheckedCreateNestedOneWithoutParticipantInput
+  attendance?: Prisma.AttendanceUncheckedCreateNestedOneWithoutParticipantInput
   verifications?: Prisma.EmailVerificationUncheckedCreateNestedManyWithoutParticipantInput
 }
 
@@ -572,7 +572,7 @@ export type ParticipantUpdateWithoutWorkshopRegistrationInput = {
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  rsvp?: Prisma.RsvpUpdateOneWithoutParticipantNestedInput
+  attendance?: Prisma.AttendanceUpdateOneWithoutParticipantNestedInput
   verifications?: Prisma.EmailVerificationUpdateManyWithoutParticipantNestedInput
 }
 
@@ -583,7 +583,7 @@ export type ParticipantUncheckedUpdateWithoutWorkshopRegistrationInput = {
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  rsvp?: Prisma.RsvpUncheckedUpdateOneWithoutParticipantNestedInput
+  attendance?: Prisma.AttendanceUncheckedUpdateOneWithoutParticipantNestedInput
   verifications?: Prisma.EmailVerificationUncheckedUpdateManyWithoutParticipantNestedInput
 }
 
@@ -625,7 +625,7 @@ export type ParticipantSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   emailVerifiedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  rsvp?: boolean | Prisma.Participant$rsvpArgs<ExtArgs>
+  attendance?: boolean | Prisma.Participant$attendanceArgs<ExtArgs>
   verifications?: boolean | Prisma.Participant$verificationsArgs<ExtArgs>
   workshopRegistration?: boolean | Prisma.Participant$workshopRegistrationArgs<ExtArgs>
   _count?: boolean | Prisma.ParticipantCountOutputTypeDefaultArgs<ExtArgs>
@@ -660,7 +660,7 @@ export type ParticipantSelectScalar = {
 
 export type ParticipantOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "emailVerifiedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["participant"]>
 export type ParticipantInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  rsvp?: boolean | Prisma.Participant$rsvpArgs<ExtArgs>
+  attendance?: boolean | Prisma.Participant$attendanceArgs<ExtArgs>
   verifications?: boolean | Prisma.Participant$verificationsArgs<ExtArgs>
   workshopRegistration?: boolean | Prisma.Participant$workshopRegistrationArgs<ExtArgs>
   _count?: boolean | Prisma.ParticipantCountOutputTypeDefaultArgs<ExtArgs>
@@ -671,7 +671,7 @@ export type ParticipantIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.
 export type $ParticipantPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Participant"
   objects: {
-    rsvp: Prisma.$RsvpPayload<ExtArgs> | null
+    attendance: Prisma.$AttendancePayload<ExtArgs> | null
     verifications: Prisma.$EmailVerificationPayload<ExtArgs>[]
     workshopRegistration: Prisma.$WorkshopRegistrationPayload<ExtArgs> | null
   }
@@ -1076,7 +1076,7 @@ readonly fields: ParticipantFieldRefs;
  */
 export interface Prisma__ParticipantClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  rsvp<T extends Prisma.Participant$rsvpArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Participant$rsvpArgs<ExtArgs>>): Prisma.Prisma__RsvpClient<runtime.Types.Result.GetResult<Prisma.$RsvpPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  attendance<T extends Prisma.Participant$attendanceArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Participant$attendanceArgs<ExtArgs>>): Prisma.Prisma__AttendanceClient<runtime.Types.Result.GetResult<Prisma.$AttendancePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   verifications<T extends Prisma.Participant$verificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Participant$verificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EmailVerificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   workshopRegistration<T extends Prisma.Participant$workshopRegistrationArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Participant$workshopRegistrationArgs<ExtArgs>>): Prisma.Prisma__WorkshopRegistrationClient<runtime.Types.Result.GetResult<Prisma.$WorkshopRegistrationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
@@ -1507,22 +1507,22 @@ export type ParticipantDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.I
 }
 
 /**
- * Participant.rsvp
+ * Participant.attendance
  */
-export type Participant$rsvpArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type Participant$attendanceArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the Rsvp
+   * Select specific fields to fetch from the Attendance
    */
-  select?: Prisma.RsvpSelect<ExtArgs> | null
+  select?: Prisma.AttendanceSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the Rsvp
+   * Omit specific fields from the Attendance
    */
-  omit?: Prisma.RsvpOmit<ExtArgs> | null
+  omit?: Prisma.AttendanceOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.RsvpInclude<ExtArgs> | null
-  where?: Prisma.RsvpWhereInput
+  include?: Prisma.AttendanceInclude<ExtArgs> | null
+  where?: Prisma.AttendanceWhereInput
 }
 
 /**

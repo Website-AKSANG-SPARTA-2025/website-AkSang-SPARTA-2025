@@ -398,7 +398,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 export const ModelName = {
   Participant: 'Participant',
-  Rsvp: 'Rsvp',
+  Attendance: 'Attendance',
   EmailVerification: 'EmailVerification',
   WorkshopRegistration: 'WorkshopRegistration',
   Submission: 'Submission'
@@ -417,7 +417,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "participant" | "rsvp" | "emailVerification" | "workshopRegistration" | "submission"
+    modelProps: "participant" | "attendance" | "emailVerification" | "workshopRegistration" | "submission"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -495,77 +495,77 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
-    Rsvp: {
-      payload: Prisma.$RsvpPayload<ExtArgs>
-      fields: Prisma.RsvpFieldRefs
+    Attendance: {
+      payload: Prisma.$AttendancePayload<ExtArgs>
+      fields: Prisma.AttendanceFieldRefs
       operations: {
         findUnique: {
-          args: Prisma.RsvpFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$RsvpPayload> | null
+          args: Prisma.AttendanceFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AttendancePayload> | null
         }
         findUniqueOrThrow: {
-          args: Prisma.RsvpFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$RsvpPayload>
+          args: Prisma.AttendanceFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AttendancePayload>
         }
         findFirst: {
-          args: Prisma.RsvpFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$RsvpPayload> | null
+          args: Prisma.AttendanceFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AttendancePayload> | null
         }
         findFirstOrThrow: {
-          args: Prisma.RsvpFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$RsvpPayload>
+          args: Prisma.AttendanceFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AttendancePayload>
         }
         findMany: {
-          args: Prisma.RsvpFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$RsvpPayload>[]
+          args: Prisma.AttendanceFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AttendancePayload>[]
         }
         create: {
-          args: Prisma.RsvpCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$RsvpPayload>
+          args: Prisma.AttendanceCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AttendancePayload>
         }
         createMany: {
-          args: Prisma.RsvpCreateManyArgs<ExtArgs>
+          args: Prisma.AttendanceCreateManyArgs<ExtArgs>
           result: BatchPayload
         }
         createManyAndReturn: {
-          args: Prisma.RsvpCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$RsvpPayload>[]
+          args: Prisma.AttendanceCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AttendancePayload>[]
         }
         delete: {
-          args: Prisma.RsvpDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$RsvpPayload>
+          args: Prisma.AttendanceDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AttendancePayload>
         }
         update: {
-          args: Prisma.RsvpUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$RsvpPayload>
+          args: Prisma.AttendanceUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AttendancePayload>
         }
         deleteMany: {
-          args: Prisma.RsvpDeleteManyArgs<ExtArgs>
+          args: Prisma.AttendanceDeleteManyArgs<ExtArgs>
           result: BatchPayload
         }
         updateMany: {
-          args: Prisma.RsvpUpdateManyArgs<ExtArgs>
+          args: Prisma.AttendanceUpdateManyArgs<ExtArgs>
           result: BatchPayload
         }
         updateManyAndReturn: {
-          args: Prisma.RsvpUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$RsvpPayload>[]
+          args: Prisma.AttendanceUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AttendancePayload>[]
         }
         upsert: {
-          args: Prisma.RsvpUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$RsvpPayload>
+          args: Prisma.AttendanceUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AttendancePayload>
         }
         aggregate: {
-          args: Prisma.RsvpAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateRsvp>
+          args: Prisma.AttendanceAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAttendance>
         }
         groupBy: {
-          args: Prisma.RsvpGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.RsvpGroupByOutputType>[]
+          args: Prisma.AttendanceGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AttendanceGroupByOutputType>[]
         }
         count: {
-          args: Prisma.RsvpCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.RsvpCountAggregateOutputType> | number
+          args: Prisma.AttendanceCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AttendanceCountAggregateOutputType> | number
         }
       }
     }
@@ -842,15 +842,17 @@ export const ParticipantScalarFieldEnum = {
 export type ParticipantScalarFieldEnum = (typeof ParticipantScalarFieldEnum)[keyof typeof ParticipantScalarFieldEnum]
 
 
-export const RsvpScalarFieldEnum = {
+export const AttendanceScalarFieldEnum = {
   id: 'id',
   participantId: 'participantId',
   status: 'status',
+  attendeeType: 'attendeeType',
+  institution: 'institution',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
-export type RsvpScalarFieldEnum = (typeof RsvpScalarFieldEnum)[keyof typeof RsvpScalarFieldEnum]
+export type AttendanceScalarFieldEnum = (typeof AttendanceScalarFieldEnum)[keyof typeof AttendanceScalarFieldEnum]
 
 
 export const EmailVerificationScalarFieldEnum = {
@@ -953,16 +955,30 @@ export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaM
 
 
 /**
- * Reference to a field of type 'RsvpStatus'
+ * Reference to a field of type 'AttendanceStatus'
  */
-export type EnumRsvpStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RsvpStatus'>
+export type EnumAttendanceStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AttendanceStatus'>
     
 
 
 /**
- * Reference to a field of type 'RsvpStatus[]'
+ * Reference to a field of type 'AttendanceStatus[]'
  */
-export type ListEnumRsvpStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RsvpStatus[]'>
+export type ListEnumAttendanceStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AttendanceStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'AttendeeType'
+ */
+export type EnumAttendeeTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AttendeeType'>
+    
+
+
+/**
+ * Reference to a field of type 'AttendeeType[]'
+ */
+export type ListEnumAttendeeTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AttendeeType[]'>
     
 
 
@@ -1187,7 +1203,7 @@ export interface PrismaClientOptionsWithAdapter extends PrismaClientBaseOptions 
 export type PrismaClientOptions = PrismaClientOptionsWithAccelerateUrl | PrismaClientOptionsWithAdapter
 export type GlobalOmitConfig = {
   participant?: Prisma.ParticipantOmit
-  rsvp?: Prisma.RsvpOmit
+  attendance?: Prisma.AttendanceOmit
   emailVerification?: Prisma.EmailVerificationOmit
   workshopRegistration?: Prisma.WorkshopRegistrationOmit
   submission?: Prisma.SubmissionOmit

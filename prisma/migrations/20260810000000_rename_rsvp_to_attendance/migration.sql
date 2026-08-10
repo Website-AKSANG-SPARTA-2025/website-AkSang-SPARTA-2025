@@ -1,0 +1,11 @@
+ALTER TYPE "RsvpStatus" RENAME TO "AttendanceStatus";
+ALTER TABLE "Rsvp" RENAME TO "Attendance";
+ALTER TABLE "Attendance" RENAME CONSTRAINT "Rsvp_pkey" TO "Attendance_pkey";
+ALTER INDEX "Rsvp_participantId_key" RENAME TO "Attendance_participantId_key";
+ALTER TABLE "Attendance" RENAME CONSTRAINT "Rsvp_participantId_fkey" TO "Attendance_participantId_fkey";
+ALTER TYPE "VerificationPurpose" RENAME VALUE 'RSVP' TO 'ATTENDANCE';
+CREATE TYPE "AttendeeType" AS ENUM ('STUDENT', 'PUBLIC');
+ALTER TABLE "Attendance" ADD COLUMN "attendeeType" "AttendeeType";
+ALTER TABLE "Attendance" ADD COLUMN "institution" TEXT;
+UPDATE "Attendance" SET "attendeeType" = 'PUBLIC';
+ALTER TABLE "Attendance" ALTER COLUMN "attendeeType" SET NOT NULL;

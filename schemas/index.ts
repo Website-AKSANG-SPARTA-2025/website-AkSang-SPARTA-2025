@@ -2,15 +2,26 @@ import { z } from "zod";
 
 const competitionPathSchema = z.enum(["CTF", "BCC", "CP"]);
 const phoneNumberSchema = z.string().trim().regex(/^\+?[0-9]{8,20}$/);
+const hasStudentInstitution = (data: { attendeeType?: string; institution?: string }) =>
+  data.attendeeType !== "STUDENT" || Boolean(data.institution);
 
-export const createRsvpSchema = z
+export const createAttendanceSchema = z
   .object({
     name: z.string().min(2).max(100),
     email: z.string().email(),
+    attendeeType: z.enum(["STUDENT", "PUBLIC"]),
+    institution: z.string().trim().min(1).optional(),
   })
-  .strict();
+  .strict()
+  .refine(hasStudentInstitution, { message: "Institution is required for students" });
 
-export const confirmRsvpSchema = z.object({}).strict();
+export const confirmAttendanceSchema = z
+  .object({
+    attendeeType: z.enum(["STUDENT", "PUBLIC"]),
+    institution: z.string().trim().min(1).optional(),
+  })
+  .strict()
+  .refine(hasStudentInstitution, { message: "Institution is required for students" });
 
 export const createWorkshopEnrollmentSchema = z
   .object({
@@ -29,7 +40,7 @@ export const verifyEmailSchema = z.object({
 export const resendVerificationSchema = z
   .object({
     email: z.string().email(),
-    purpose: z.enum(["RSVP", "WORKSHOP"]),
+    purpose: z.enum(["ATTENDANCE", "WORKSHOP"]),
   })
   .strict();
 

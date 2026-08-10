@@ -9,7 +9,7 @@
  * 🟢 You can import this file directly.
  */
 export type * from './models/Participant'
-export type * from './models/Rsvp'
+export type * from './models/Attendance'
 export type * from './models/EmailVerification'
 export type * from './models/WorkshopRegistration'
 export type * from './models/Submission'

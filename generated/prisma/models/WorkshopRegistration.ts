@@ -426,10 +426,6 @@ export type EnumCompetitionPathFieldUpdateOperationsInput = {
   set?: $Enums.CompetitionPath
 }
 
-export type NullableStringFieldUpdateOperationsInput = {
-  set?: string | null
-}
-
 export type EnumWorkshopRegistrationStatusFieldUpdateOperationsInput = {
   set?: $Enums.WorkshopRegistrationStatus
 }
