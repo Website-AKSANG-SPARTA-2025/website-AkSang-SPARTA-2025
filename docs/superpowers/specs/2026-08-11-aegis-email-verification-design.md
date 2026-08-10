@@ -12,7 +12,7 @@ as the local authorization source.
   email-verification flow.
 - The existing signed `participant_session` carries only `participantId` and
   expiry. Protected routes already require both that session and a non-null
-  `emailVerifiedAt`.
+  `emailVerifiedAt`; a public registration email alone cannot safely mint it.
 - There is no active verification UI, middleware, login flow, password-reset
   flow, or other Resend caller in this repository.
 
@@ -25,13 +25,14 @@ as the local authorization source.
 2. Registration keeps creating the local participant and pending Attendance or
    WorkshopRegistration first, then asks Aegis to send verification. A send
    failure leaves that local pending state intact for a later resend.
-3. Registration/enrollment issues the existing signed HttpOnly session cookie
-   even before verification. This identifies the participant only for the
-   verification-status endpoint; `requireVerifiedParticipant` continues to
-   reject it until the local database is synchronized.
+3. Registration/enrollment does not issue a session from an unauthenticated
+   email input. A pre-verification cookie would let someone who registered a
+   victim's email claim the local account after the victim verifies externally.
 4. A session-bound status endpoint reads the participant email from the local
    database. It returns local verified state without an upstream call, or asks
    Aegis once when local state is pending. Client-supplied email is never used.
+   A post-verification browser session needs a future Aegis signed callback or
+   a separate login mechanism; neither is included in the supplied API.
 5. When Aegis reports `verified` or `already_verified`, one local transaction
    records Aegis's `verifiedAt` timestamp and promotes every matching pending
    local record for that participant (`Attendance` to `VERIFIED`,
