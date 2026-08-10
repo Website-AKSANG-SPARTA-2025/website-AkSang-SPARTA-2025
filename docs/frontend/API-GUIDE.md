@@ -24,7 +24,7 @@ await fetch("/api/attendances", {
 });
 ```
 
-Success responses always contain `success: true` and `data`; `message` is optional.
+JSON success responses contain `success: true` and `data`; `message` is optional. The exception is `GET /api/workshops/invitation`, which returns a bare `302` redirect rather than JSON, so generic response wrappers must navigate to it instead of parsing the response as JSON.
 
 ```json
 {
@@ -129,7 +129,7 @@ await fetch("/api/attendances", {
 - Body: `email` and `purpose` (`ATTENDANCE` or `WORKSHOP`); do not call Aegis from the browser.
 - Success: `202` `{ "success": true, "data": { "status": "sent", "expiresAt": "..." } }`; `200` already verified `{ "success": true, "data": { "verified": true, "status": "verified", "verifiedAt": "..." } }`.
 - Errors: `400` invalid email/body, `404` participant or purpose-specific record missing, `409` attendance already verified, `429` cooldown/limit, `502` upstream failure.
-- UI: for `202`, confirm that a new email was sent. For `200` verified, stop offering resend. On `429`, disable the button and set the countdown from `response.errors.retryAfter` when supplied; if absent, show the rate-limit message without inventing a duration.
+- UI: for `202`, confirm that a new email was sent. For `200` verified, stop offering resend. On `429`, disable the button and set the countdown from `payload.errors?.retryAfter` when supplied; if absent, show the rate-limit message without inventing a duration.
 
 ```ts
 const response = await fetch("/api/verifications/resend", {
@@ -137,14 +137,14 @@ const response = await fetch("/api/verifications/resend", {
   body: JSON.stringify({ email, purpose: "ATTENDANCE" }),
 });
 const payload = await response.json();
-if (response.status === 429 && typeof payload.errors?.retryAfter === "number") startCountdown(payload.errors.retryAfter);
+if (response.status === 429 && typeof payload.errors?.retryAfter === "number") startCountdown(payload.errors?.retryAfter);
 ```
 
 ### GET /api/verifications/status
 
 - Session: participant session required (verification is not required). Content type: none; request has no body.
 - Request: send no `email` query parameter or client-selected identity. The route only reads the participant in `participant_session`.
-- Success: `200` verified `{ "success": true, "data": { "verified": true, "status": "verified", "verifiedAt": "..." } }`; not verified `{ "success": true, "data": { "verified": false, "status": "not_verified", "registeredAt": "...", "linkActive": true, "linkExpiresAt": "..." } }`; or `{ "success": true, "data": { "verified": false, "status": "not_registered" } }`.
+- Success: `200` verified `{ "success": true, "data": { "verified": true, "status": "verified", "verifiedAt": "..." } }`; not verified `{ "success": true, "data": { "verified": false, "status": "not_verified", "registeredAt": "...", "linkActive": true, "linkExpiresAt": "..." } }` where `linkExpiresAt` is optional; or `{ "success": true, "data": { "verified": false, "status": "not_registered" } }`.
 - Errors: `401` no usable participant session, `502` verification service failure.
 - UI: `linkActive: false` means the displayed verification link is inactive; offer resend rather than treating it as an active link. This call may synchronize local `PENDING` attendance/workshop state after Aegis reports verified.
 
