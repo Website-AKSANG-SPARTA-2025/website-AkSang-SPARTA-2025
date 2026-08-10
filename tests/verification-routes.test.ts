@@ -3,28 +3,19 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ApplicationError } from "../errors/application-error";
 
 const boundaries = vi.hoisted(() => ({
-  verifyToken: vi.fn(),
+  getVerificationStatus: vi.fn(),
+  requireParticipant: vi.fn(),
   resendVerification: vi.fn(),
-  sendVerificationEmail: vi.fn(),
-  setParticipantSessionCookie: vi.fn(async (response: Response) => {
-    response.headers.set("Set-Cookie", "participant_session=signed; HttpOnly");
-    return response;
-  }),
 }));
 
 vi.mock("../services/verification.service", () => ({
-  verifyToken: boundaries.verifyToken,
+  getVerificationStatus: boundaries.getVerificationStatus,
   resendVerification: boundaries.resendVerification,
 }));
-vi.mock("../services/notification.service", () => ({
-  sendVerificationEmail: boundaries.sendVerificationEmail,
-}));
-vi.mock("../lib/session", () => ({
-  setParticipantSessionCookie: boundaries.setParticipantSessionCookie,
-}));
+vi.mock("../lib/auth", () => ({ requireParticipant: boundaries.requireParticipant }));
 
 import { POST as resendRoute } from "../app/api/verifications/resend/route";
-import { GET as verifyRoute } from "../app/api/verifications/verify/route";
+import { GET as statusRoute } from "../app/api/verifications/status/route";
 
 function resendRequest(body: unknown): Request {
   return new Request("https://app.example.test/api/verifications/resend", {
@@ -35,59 +26,21 @@ function resendRequest(body: unknown): Request {
 }
 
 beforeEach(() => {
-  boundaries.verifyToken.mockReset();
+  boundaries.getVerificationStatus.mockReset();
+  boundaries.requireParticipant.mockReset();
   boundaries.resendVerification.mockReset();
-  boundaries.sendVerificationEmail.mockReset();
-  boundaries.setParticipantSessionCookie.mockClear();
+  boundaries.requireParticipant.mockResolvedValue({
+    id: "participant-1",
+    email: "ada@example.com",
+    emailVerifiedAt: null,
+  });
 });
 
-describe("verification routes", () => {
-  it("redirects verified ATTENDANCE to the event and sets the session cookie", async () => {
-    boundaries.verifyToken.mockResolvedValue({ participantId: "participant-1", purpose: "ATTENDANCE" });
-
-    const response = await verifyRoute(
-      new Request("https://app.example.test/api/verifications/verify?token=valid-token"),
-    );
-
-    expect(response.status).toBe(302);
-    expect(response.headers.get("location")).toBe("https://app.example.test/event?verified=true");
-    expect(response.headers.get("set-cookie")).toContain("participant_session=");
-    expect(boundaries.setParticipantSessionCookie).toHaveBeenCalledWith(expect.any(Response), "participant-1");
-  });
-
-  it("redirects WORKSHOP verification without changing its purpose", async () => {
-    boundaries.verifyToken.mockResolvedValue({ participantId: "participant-1", purpose: "WORKSHOP" });
-
-    const response = await verifyRoute(
-      new Request("https://app.example.test/api/verifications/verify?token=workshop-token"),
-    );
-
-    expect(response.status).toBe(302);
-    expect(response.headers.get("location")).toBe("https://app.example.test/workshop?verified=true");
-  });
-
-  it("maps missing, invalid, and expired verification links without setting a session", async () => {
-    const missing = await verifyRoute(new Request("https://app.example.test/api/verifications/verify"));
-    expect(missing.status).toBe(400);
-    expect(boundaries.verifyToken).not.toHaveBeenCalled();
-
-    boundaries.verifyToken.mockRejectedValue(
-      new ApplicationError("VERIFICATION_EXPIRED", 410, "Verification link has expired"),
-    );
-    const expired = await verifyRoute(
-      new Request("https://app.example.test/api/verifications/verify?token=expired"),
-    );
-    expect(expired.status).toBe(410);
-    expect(boundaries.setParticipantSessionCookie).not.toHaveBeenCalled();
-  });
-
-  it("resends through email after eligibility and never returns the raw URL", async () => {
+describe("Aegis verification routes", () => {
+  it("resends through Aegis and never exposes an email link or token", async () => {
     boundaries.resendVerification.mockResolvedValue({
-      participantId: "participant-1",
-      participantName: "Ada Lovelace",
-      email: "ada@example.com",
-      purpose: "ATTENDANCE",
-      verificationUrl: "https://app.example.test/api/verifications/verify?token=secret-token",
+      status: "sent",
+      expiresAt: "2026-08-11T01:00:00.000Z",
     });
 
     const response = await resendRoute(resendRequest({ email: "ada@example.com", purpose: "ATTENDANCE" }));
@@ -96,34 +49,112 @@ describe("verification routes", () => {
     expect(response.status).toBe(202);
     expect(body).toEqual({
       success: true,
-      message: "A new verification link has been sent",
-      data: {},
+      message: "A new verification email has been sent",
+      data: { status: "sent", expiresAt: "2026-08-11T01:00:00.000Z" },
     });
-    expect(JSON.stringify(body)).not.toContain("secret-token");
-    expect(boundaries.sendVerificationEmail).toHaveBeenCalledWith({
-      to: "ada@example.com",
-      participantName: "Ada Lovelace",
+    expect(JSON.stringify(body)).not.toMatch(/token|https?:/i);
+    expect(boundaries.resendVerification).toHaveBeenCalledWith({
+      email: "ada@example.com",
       purpose: "ATTENDANCE",
-      verificationUrl: "https://app.example.test/api/verifications/verify?token=secret-token",
     });
   });
 
-  it("maps safe provider failures after resend state is created", async () => {
+  it("returns verified when Aegis resend reports an already verified email", async () => {
     boundaries.resendVerification.mockResolvedValue({
-      participantId: "participant-1",
-      participantName: "Ada Lovelace",
-      email: "ada@example.com",
-      purpose: "ATTENDANCE",
-      verificationUrl: "https://app.example.test/api/verifications/verify?token=secret-token",
+      status: "already_verified",
+      verifiedAt: "2026-08-11T01:00:00.000Z",
     });
-    boundaries.sendVerificationEmail.mockRejectedValue(
-      new ApplicationError("EXTERNAL_PROVIDER_ERROR", 502, "Unable to send verification email"),
-    );
 
     const response = await resendRoute(resendRequest({ email: "ada@example.com", purpose: "ATTENDANCE" }));
-    const body = await response.json();
 
-    expect(response.status).toBe(502);
-    expect(JSON.stringify(body)).not.toContain("secret-token");
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      success: true,
+      message: "Email is already verified",
+      data: {
+        verified: true,
+        status: "verified",
+        verifiedAt: "2026-08-11T01:00:00.000Z",
+      },
+    });
+  });
+
+  it("preserves resend cooldown and upstream error details", async () => {
+    boundaries.resendVerification.mockRejectedValueOnce(
+      new ApplicationError("RATE_LIMITED", 429, "Please wait", { retryAfter: 41 }),
+    );
+    const cooldown = await resendRoute(resendRequest({ email: "ada@example.com", purpose: "ATTENDANCE" }));
+    expect(cooldown.status).toBe(429);
+    expect(await cooldown.json()).toEqual({
+      success: false,
+      message: "Please wait",
+      errors: { retryAfter: 41 },
+    });
+
+    boundaries.resendVerification.mockRejectedValueOnce(
+      new ApplicationError("RATE_LIMITED", 429, "Too many verification requests"),
+    );
+    const tooMany = await resendRoute(resendRequest({ email: "ada@example.com", purpose: "ATTENDANCE" }));
+    expect(tooMany.status).toBe(429);
+
+    boundaries.resendVerification.mockRejectedValueOnce(
+      new ApplicationError("EXTERNAL_PROVIDER_ERROR", 502, "Verification email could not be sent"),
+    );
+    const unavailable = await resendRoute(resendRequest({ email: "ada@example.com", purpose: "ATTENDANCE" }));
+    expect(unavailable.status).toBe(502);
+  });
+
+  it("checks status for the signed-session participant instead of an arbitrary query email", async () => {
+    boundaries.getVerificationStatus.mockResolvedValue({
+      verified: false,
+      status: "not_verified",
+      registeredAt: "2026-08-11T00:00:00.000Z",
+      linkActive: false,
+    });
+
+    const response = await statusRoute(
+      new Request("https://app.example.test/api/verifications/status?email=other@example.com"),
+    );
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      success: true,
+      data: {
+        verified: false,
+        status: "not_verified",
+        registeredAt: "2026-08-11T00:00:00.000Z",
+        linkActive: false,
+      },
+    });
+    expect(boundaries.getVerificationStatus).toHaveBeenCalledWith({
+      id: "participant-1",
+      email: "ada@example.com",
+      emailVerifiedAt: null,
+    });
+  });
+
+  it("returns status variants and rejects callers without a valid session", async () => {
+    boundaries.getVerificationStatus.mockResolvedValueOnce({
+      verified: true,
+      status: "verified",
+      verifiedAt: "2026-08-11T01:00:00.000Z",
+    });
+    const verified = await statusRoute(new Request("https://app.example.test/api/verifications/status"));
+    expect(verified.status).toBe(200);
+    expect(await verified.json()).toMatchObject({ data: { verified: true, status: "verified" } });
+
+    boundaries.getVerificationStatus.mockResolvedValueOnce({
+      verified: false,
+      status: "not_registered",
+    });
+    const unknown = await statusRoute(new Request("https://app.example.test/api/verifications/status"));
+    expect(unknown.status).toBe(200);
+    expect(await unknown.json()).toMatchObject({ data: { status: "not_registered" } });
+
+    boundaries.requireParticipant.mockRejectedValueOnce(
+      new ApplicationError("UNAUTHORIZED", 401, "Authentication required"),
+    );
+    const unauthorized = await statusRoute(new Request("https://app.example.test/api/verifications/status"));
+    expect(unauthorized.status).toBe(401);
   });
 });

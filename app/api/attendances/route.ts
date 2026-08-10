@@ -1,8 +1,7 @@
 import { errorResponse, parseJsonBody, successResponse } from "../../../lib/api";
 import { createAttendanceSchema } from "../../../schemas";
 import { createAttendance } from "../../../services/attendance.service";
-import { sendVerificationEmail } from "../../../services/notification.service";
-import { createVerification } from "../../../services/verification.service";
+import { sendVerification } from "../../../services/verification.service";
 
 export async function POST(request: Request): Promise<Response> {
   try {
@@ -14,14 +13,15 @@ export async function POST(request: Request): Promise<Response> {
       return successResponse(data, "Attendance is awaiting verification");
     }
 
-    const verification = await createVerification(result.participant.id, "ATTENDANCE");
-    await sendVerificationEmail({
-      to: result.participant.email,
-      participantName: result.participant.name,
-      verificationUrl: verification.verificationUrl,
-      purpose: verification.purpose,
-    });
-    return successResponse(data, "Verification link has been sent to your email", { status: 202 });
+    const verification = await sendVerification(result.participant);
+    if (verification.status === "already_verified") {
+      return successResponse(
+        { attendanceId: result.attendance.id, status: "VERIFIED", verifiedAt: verification.verifiedAt },
+        "Email is already verified",
+      );
+    }
+
+    return successResponse(data, "Verification email has been sent", { status: 202 });
   } catch (error) {
     return errorResponse(error);
   }

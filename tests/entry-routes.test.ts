@@ -5,15 +5,13 @@ import { ApplicationError } from "../errors/application-error";
 const boundaries = vi.hoisted(() => ({
   createAttendance: vi.fn(),
   enrollWorkshop: vi.fn(),
-  createVerification: vi.fn(),
-  sendVerificationEmail: vi.fn(),
+  sendVerification: vi.fn(),
 }));
 
 vi.mock("../services/attendance.service", () => ({ createAttendance: boundaries.createAttendance }));
 vi.mock("../services/workshop.service", () => ({ enrollWorkshop: boundaries.enrollWorkshop }));
-vi.mock("../services/verification.service", () => ({ createVerification: boundaries.createVerification }));
-vi.mock("../services/notification.service", () => ({
-  sendVerificationEmail: boundaries.sendVerificationEmail,
+vi.mock("../services/verification.service", () => ({
+  sendVerification: boundaries.sendVerification,
 }));
 
 import { POST as createAttendanceRoute } from "../app/api/attendances/route";
@@ -31,12 +29,12 @@ const workshopInput = {
   phoneNumber: "+62812345678",
 };
 const attendanceResult = {
-  participant: { id: "participant-1", name: "Ada Lovelace", email: "ada@example.com" },
+  participant: { id: "participant-1", name: "Ada Lovelace", email: "ada@example.com", emailVerifiedAt: null },
   attendance: { id: "attendance-1", status: "PENDING" },
   created: true,
 };
 const workshopResult = {
-  participant: { id: "participant-2", name: "Grace Hopper", email: "grace@example.com" },
+  participant: { id: "participant-2", name: "Grace Hopper", email: "grace@example.com", emailVerifiedAt: null },
   registration: { id: "registration-1", status: "PENDING", competitionPath: "CTF" },
   created: true,
 };
@@ -52,17 +50,15 @@ function jsonRequest(url: string, body: unknown): Request {
 beforeEach(() => {
   boundaries.createAttendance.mockReset();
   boundaries.enrollWorkshop.mockReset();
-  boundaries.createVerification.mockReset();
-  boundaries.sendVerificationEmail.mockReset();
-  boundaries.createVerification.mockResolvedValue({
-    participantId: "participant-1",
-    purpose: "ATTENDANCE",
-    verificationUrl: "https://app.example.test/api/verifications/verify?token=secret-token",
+  boundaries.sendVerification.mockReset();
+  boundaries.sendVerification.mockResolvedValue({
+    status: "sent",
+    expiresAt: "2026-08-11T01:00:00.000Z",
   });
 });
 
 describe("public entry routes", () => {
-  it("creates Attendance, sends one ATTENDANCE email, and never exposes its token", async () => {
+  it("creates unverified pending Attendance and asks Aegis to send its verification email", async () => {
     boundaries.createAttendance.mockResolvedValue(attendanceResult);
 
     const response = await createAttendanceRoute(
@@ -73,20 +69,14 @@ describe("public entry routes", () => {
     expect(response.status).toBe(202);
     expect(body).toEqual({
       success: true,
-      message: "Verification link has been sent to your email",
+      message: "Verification email has been sent",
       data: { attendanceId: "attendance-1", status: "PENDING" },
     });
-    expect(JSON.stringify(body)).not.toContain("secret-token");
-    expect(boundaries.createVerification).toHaveBeenCalledWith("participant-1", "ATTENDANCE");
-    expect(boundaries.sendVerificationEmail).toHaveBeenCalledWith({
-      to: "ada@example.com",
-      participantName: "Ada Lovelace",
-      verificationUrl: "https://app.example.test/api/verifications/verify?token=secret-token",
-      purpose: "ATTENDANCE",
-    });
+    expect(response.headers.get("set-cookie")).toBeNull();
+    expect(boundaries.sendVerification).toHaveBeenCalledWith(attendanceResult.participant);
   });
 
-  it("returns an existing pending Attendance without sending a replacement link", async () => {
+  it("keeps an existing pending Attendance without requesting another Aegis email", async () => {
     boundaries.createAttendance.mockResolvedValue({ ...attendanceResult, created: false });
 
     const response = await createAttendanceRoute(
@@ -99,50 +89,52 @@ describe("public entry routes", () => {
       message: "Attendance is awaiting verification",
       data: { attendanceId: "attendance-1", status: "PENDING" },
     });
-    expect(boundaries.createVerification).not.toHaveBeenCalled();
-    expect(boundaries.sendVerificationEmail).not.toHaveBeenCalled();
+    expect(boundaries.sendVerification).not.toHaveBeenCalled();
   });
 
-  it("returns a safe provider failure after creating pending Attendance", async () => {
+  it("keeps new Attendance pending when Aegis delivery is unavailable", async () => {
     boundaries.createAttendance.mockResolvedValue(attendanceResult);
-    boundaries.sendVerificationEmail.mockRejectedValue(
-      new ApplicationError("EXTERNAL_PROVIDER_ERROR", 502, "Unable to send verification email"),
+    boundaries.sendVerification.mockRejectedValue(
+      new ApplicationError("EXTERNAL_PROVIDER_ERROR", 502, "Verification email could not be sent"),
     );
 
     const response = await createAttendanceRoute(
       jsonRequest("https://app.example.test/api/attendances", attendanceInput),
     );
-    const body = await response.json();
 
     expect(response.status).toBe(502);
-    expect(JSON.stringify(body)).not.toContain("secret-token");
+    expect(await response.json()).toEqual({
+      success: false,
+      message: "Verification email could not be sent",
+    });
     expect(boundaries.createAttendance).toHaveBeenCalledTimes(1);
-    expect(boundaries.createVerification).toHaveBeenCalledTimes(1);
   });
 
-  it("maps a verified Attendance conflict and rejects invalid public input", async () => {
-    boundaries.createAttendance.mockRejectedValue(
-      new ApplicationError("CONFLICT", 409, "Attendance already verified"),
-    );
+  it("returns a locally synchronized verified Attendance when Aegis already knows the email", async () => {
+    boundaries.createAttendance.mockResolvedValue(attendanceResult);
+    boundaries.sendVerification.mockResolvedValue({
+      status: "already_verified",
+      verifiedAt: "2026-08-11T01:00:00.000Z",
+    });
 
-    const conflict = await createAttendanceRoute(
+    const response = await createAttendanceRoute(
       jsonRequest("https://app.example.test/api/attendances", attendanceInput),
     );
-    expect(conflict.status).toBe(409);
 
-    const invalid = await createAttendanceRoute(
-      jsonRequest("https://app.example.test/api/attendances", { ...attendanceInput, participantId: "forged" }),
-    );
-    expect(invalid.status).toBe(400);
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      success: true,
+      message: "Email is already verified",
+      data: {
+        attendanceId: "attendance-1",
+        status: "VERIFIED",
+        verifiedAt: "2026-08-11T01:00:00.000Z",
+      },
+    });
   });
 
-  it("creates workshop enrollment with an isolated WORKSHOP verification email", async () => {
+  it("creates workshop enrollment and sends through Aegis without exposing a token", async () => {
     boundaries.enrollWorkshop.mockResolvedValue(workshopResult);
-    boundaries.createVerification.mockResolvedValue({
-      participantId: "participant-2",
-      purpose: "WORKSHOP",
-      verificationUrl: "https://app.example.test/api/verifications/verify?token=workshop-secret",
-    });
 
     const response = await enrollWorkshopRoute(
       jsonRequest("https://app.example.test/api/workshops/enroll", workshopInput),
@@ -152,34 +144,10 @@ describe("public entry routes", () => {
     expect(response.status).toBe(202);
     expect(body).toEqual({
       success: true,
-      message: "Verification link has been sent to your email",
+      message: "Verification email has been sent",
       data: { status: "PENDING", competitionPath: "CTF" },
     });
-    expect(JSON.stringify(body)).not.toContain("workshop-secret");
-    expect(boundaries.createAttendance).not.toHaveBeenCalled();
-    expect(boundaries.createVerification).toHaveBeenCalledWith("participant-2", "WORKSHOP");
-    expect(boundaries.sendVerificationEmail).toHaveBeenCalledWith({
-      to: "grace@example.com",
-      participantName: "Grace Hopper",
-      verificationUrl: "https://app.example.test/api/verifications/verify?token=workshop-secret",
-      purpose: "WORKSHOP",
-    });
-  });
-
-  it("returns a pending workshop enrollment without overwriting or emailing it", async () => {
-    boundaries.enrollWorkshop.mockResolvedValue({ ...workshopResult, created: false });
-
-    const response = await enrollWorkshopRoute(
-      jsonRequest("https://app.example.test/api/workshops/enroll", workshopInput),
-    );
-
-    expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({
-      success: true,
-      message: "Workshop registration is awaiting verification",
-      data: { status: "PENDING", competitionPath: "CTF" },
-    });
-    expect(boundaries.createVerification).not.toHaveBeenCalled();
-    expect(boundaries.sendVerificationEmail).not.toHaveBeenCalled();
+    expect(JSON.stringify(body)).not.toMatch(/token|aegis-api/i);
+    expect(boundaries.sendVerification).toHaveBeenCalledWith(workshopResult.participant);
   });
 });
