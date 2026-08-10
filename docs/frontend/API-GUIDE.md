@@ -169,7 +169,7 @@ if (response.status === 429 && typeof payload.errors?.retryAfter === "number") s
 - Session: verified participant with an `ACTIVE` workshop registration required. Content type: none; request has no body.
 - Success: `302` to the configured community invitation for the participant's stored path. It has no JSON success envelope.
 - Errors: `401` no verified session, `403` no active registration.
-- UI: navigate instead of reading a fetch redirect response, for example: `window.location.assign("/api/workshops/invitation")`.
+- UI: navigate with a plain link such as `<a href="/api/workshops/invitation">Open invitation</a>` instead of fetching and parsing a redirect response.
 
 ### POST /api/submissions
 
@@ -238,6 +238,14 @@ The current session blocker applies to every verified-session action: Aegis veri
 | `CompetitionPath` | `CTF`, `BCC`, `CP` |
 
 Each Participant has zero or one Attendance and zero or one WorkshopRegistration. Each WorkshopRegistration has zero or many Submissions. Attendance and WorkshopRegistration are deleted if their Participant is deleted; Submissions belong to their WorkshopRegistration.
+
+## Development API tester
+
+Run `npm run dev` and open `/dev/api-tester`. The page is available only when
+`NODE_ENV=development`, sends live same-origin requests, and never calls Aegis
+directly. Use test email addresses because public entry and resend actions can
+send verification email. Session-required actions still need a server-issued
+`participant_session`; the tester intentionally does not bypass that limit.
 
 ## Frontend integration checklist
 

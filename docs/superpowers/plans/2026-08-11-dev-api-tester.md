@@ -13,7 +13,7 @@
 - Read `node_modules/next/dist/docs/01-app/01-getting-started/03-layouts-and-pages.md` completely before writing Next page code.
 - `/dev/api-tester` must call `notFound()` unless `NODE_ENV === "development"`.
 - Never expose `AEGIS_VERIFICATION_API_KEY`, any server environment value, token, participant ID, invitation URL, or local session-cookie construction to client code.
-- Use existing same-origin routes only, `credentials: "include"`, JSON for JSON routes, `FormData` for submission, and `window.location.assign("/api/workshops/invitation")` for invitation.
+- Use existing same-origin routes only, `credentials: "include"`, JSON for JSON routes, `FormData` for submission, and a plain `<a href="/api/workshops/invitation">` for invitation.
 - Do not add a session test endpoint, mock mode, dependency, database/schema change, or backend behavior change.
 - Public actions can be live; session-required actions must visibly explain the existing session-handoff limitation and may return `401` for a fresh browser.
 - Preserve unrelated user changes in `docs/superpowers/specs/2026-08-10-attendance-design.md` and other user-owned plan files.
@@ -218,7 +218,7 @@ POST /api/verifications/resend     JSON { email, purpose }
 GET  /api/verifications/status     no body and no email query parameter
 POST /api/workshops/enroll         JSON { name, email, competitionPath, phoneNumber, nim? }
 POST /api/workshops/register       JSON { competitionPath, phoneNumber, nim? }
-GET  /api/workshops/invitation     window.location.assign("/api/workshops/invitation")
+GET  /api/workshops/invitation     plain `<a href="/api/workshops/invitation">` navigation
 POST /api/submissions              FormData with exactly competitionPath and file
 ```
 
