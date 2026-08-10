@@ -6,6 +6,11 @@ import "./globals.css";
 const scienceGothic = Science_Gothic({
   variable: "--font-science-gothic",
   subsets: ["latin"],
+  // Science Gothic postdates Next's bundled capsize metrics table, so it has no
+  // precalculated fallback overrides. Opting out skips a lookup that always
+  // fails (and logs); the explicit stack is what actually covers the swap.
+  fallback: ["Arial", "sans-serif"],
+  adjustFontFallback: false,
 });
 
 // Sub-headings and body.
