@@ -5,10 +5,10 @@
 - **Deadline:** 10 August 2026 before BE-07/BE-08/BE-10 merge
 - **Sprint:** 1
 - **Merge order:** 6
-- **Depends on:** BE-03 RSVP-confirmation service; BE-04 successful verify result (`participantId`, `purpose`)
+- **Depends on:** BE-03 Attendance-confirmation service; BE-04 successful verify result (`participantId`, `purpose`)
 - **Blocks:** BE-07 workshop registration, BE-08 invitation, BE-10 submission
 - **Contract:** verification success creates `participant_session`; protected routes resolve participant from it
-- **Owned files:** `lib/session.ts`, `lib/auth.ts`, `app/api/verifications/verify/route.ts`, `app/api/rsvps/confirm/route.ts`, session/auth helper tests
+- **Owned files:** `lib/session.ts`, `lib/auth.ts`, `app/api/verifications/verify/route.ts`, `app/api/attendances/confirm/route.ts`, session/auth helper tests
 
 > **Global rules:** API/DB contract is frozen by Backend Lead. Do not rename endpoints, request fields, response fields, model names, or cross-module interfaces without approval. Every secret stays server-side and must never be committed or logged.
 
@@ -39,7 +39,7 @@ Owned workload:
 
 - `lib/auth.ts` containing `requireVerifiedParticipant`;
 - BE-04 verify-route success-branch integration;
-- `app/api/rsvps/confirm/route.ts`;
+- `app/api/attendances/confirm/route.ts`;
 - identity resolver, protected-route boundary, and route integration tests.
 
 Required behavior:
@@ -47,7 +47,7 @@ Required behavior:
 - consume BE-06A session verification rather than reimplementing signatures;
 - load Participant by trusted session ID and require `emailVerifiedAt`;
 - set the cookie and redirect only after BE-04 reports successful verification;
-- validate `{}` and call BE-03 confirmation service with trusted participant ID;
+- validate classification-only input and call BE-03 confirmation service with trusted participant ID;
 - export one stable resolver for BE-07, BE-08, and BE-10.
 
 Both PICs review tampered/expired/unverified-session tests. They agree on the
@@ -65,8 +65,9 @@ Turn a successful email verification into a secure HttpOnly session and give pro
 - Workshop activation and submission must never require name/email again. The
   workshop route may collect only its approved path, required phone number, and
   optional NIM after session resolution.
-- RSVP confirmation is the only session-based RSVP action; it calls BE-03's
-  service with a trusted participant ID and accepts a strictly empty body.
+- Attendance confirmation is the only session-based Attendance action; it calls BE-03's
+  service with a trusted participant ID and accepts only `attendeeType` plus a
+  required `institution` for `STUDENT`.
 
 ## Work-order configuration decisions
 ```env
@@ -104,7 +105,7 @@ Provide equivalent functions:
 ```ts
 createParticipantSession(participantId): token
 setParticipantSessionCookie(response, participantId): response
-readParticipantSession(request): { participantId } | null
+readParticipantSession(request): { participantId; exp } | null
 requireVerifiedParticipant(request): Participant
 clearParticipantSessionCookie(response): response
 ```
@@ -126,28 +127,30 @@ Location: <redirect selected by verification purpose>
 Set-Cookie: participant_session=...; HttpOnly; Secure; SameSite=Lax; Path=/
 ```
 
-`RSVP` redirects to `/event?verified=true`; `WORKSHOP` redirects to
-`/workshop?verified=true` without changing RSVP.
+`ATTENDANCE` redirects to `/event?verified=true`; `WORKSHOP` redirects to
+`/workshop?verified=true` without changing Attendance.
 Do not change BE-04 token validation/transaction rules.
 
-## RSVP-confirmation route integration
+## Attendance-confirmation route integration
 Implement the session boundary for:
 ```http
-POST /api/rsvps/confirm
+POST /api/attendances/confirm
 Cookie: participant_session=...
 Content-Type: application/json
 ```
-Validate a strictly empty `{}` body, call `requireVerifiedParticipant`, then call
-BE-03 `confirmRsvpForVerifiedParticipant(participant.id)`. Do not accept
-name/email/participant ID and do not alter BE-03 RSVP state rules.
+Validate a classification-only body, call `requireVerifiedParticipant`, then call
+BE-03 `confirmAttendanceForVerifiedParticipant(participant.id, classification)`.
+Do not accept name/email/participant ID. A pending Attendance can be promoted
+only when its saved classification matches, and a verified Attendance is a
+conflict.
 
 ## Suggested steps
 1. Implement signed-token encode/decode with expiry validation.
-2. Implement cookie helpers using Next.js server APIs used by the repo.
+2. Implement cookie helpers with the native Request/Response APIs used by the repo.
 3. Implement `requireVerifiedParticipant` DB check.
 4. Wire session creation after BE-04 returns successful verified `participantId`
    and redirect from its purpose.
-5. Implement the strict session-boundary route for RSVP confirmation using
+5. Implement the strict session-boundary route for Attendance confirmation using
    BE-03 service.
 6. Add tests for missing, tampered, expired, unverified participant, verified participant.
 7. Export stable helper path for BE-07/BE-08/BE-10.
@@ -161,11 +164,12 @@ name/email/participant ID and do not alter BE-03 RSVP state rules.
 - Do not accept participant ID from request body as authentication.
 
 ## Done = (acceptance criteria — become tests)
-- [ ] Verification success sets `participant_session` and redirects to `/event?verified=true`.
+- [ ] ATTENDANCE-purpose verification success sets `participant_session` and redirects to `/event?verified=true`.
 - [ ] WORKSHOP-purpose verification success sets `participant_session` and
-  redirects to `/workshop?verified=true` without changing RSVP.
-- [ ] `POST /api/rsvps/confirm` requires a verified session and rejects identity
-  fields before calling BE-03 service.
+  redirects to `/workshop?verified=true` without changing Attendance.
+- [ ] `POST /api/attendances/confirm` requires a verified session, accepts only
+  attendee classification, rejects identity fields, and preserves the pending
+  classification-match and verified-conflict rules before calling BE-03 service.
 - [ ] Cookie is HttpOnly, SameSite=Lax, Path=/, and Secure in production.
 - [ ] Valid session resolves the exact verified Participant.
 - [ ] Missing cookie → `401`.

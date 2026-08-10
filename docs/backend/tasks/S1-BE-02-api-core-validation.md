@@ -18,11 +18,13 @@ Give every backend route one consistent way to validate input and return predict
 
 ## Context you need to know
 Approved request schemas are:
-- RSVP: `{ name, email }`.
-- RSVP confirmation from a verified session: `{}`.
+- Attendance: `{ name, email, attendeeType, institution? }`; `institution` is
+  required when `attendeeType` is `STUDENT`.
+- Attendance confirmation from a verified session: `{ attendeeType, institution? }`;
+  identity fields are forbidden and `institution` is required for `STUDENT`.
 - Workshop enrollment: `{ name, email, competitionPath, phoneNumber, nim? }`.
 - Verify link query: `{ token }`.
-- Resend verification: `{ email, purpose: "RSVP" | "WORKSHOP" }`.
+- Resend verification: `{ email, purpose: "ATTENDANCE" | "WORKSHOP" }`.
 - Workshop activation: `{ competitionPath, phoneNumber, nim? }`; name/email are forbidden as business inputs.
 - Submission metadata: `{ competitionPath }`; file validation is separate.
 
@@ -39,12 +41,23 @@ Approved error semantics:
 
 ## Required Zod schemas
 ```ts
-createRsvpSchema = z.object({
+createAttendanceSchema = z.object({
   name: z.string().min(2).max(100),
   email: z.string().email(),
+  attendeeType: z.enum(["STUDENT", "PUBLIC"]),
+  institution: z.string().trim().min(1).optional(),
 }).strict()
+  .refine(({ attendeeType, institution }) => attendeeType !== "STUDENT" || Boolean(institution), {
+    message: "Institution is required for students",
+  })
 
-confirmRsvpSchema = z.object({}).strict()
+confirmAttendanceSchema = z.object({
+  attendeeType: z.enum(["STUDENT", "PUBLIC"]),
+  institution: z.string().trim().min(1).optional(),
+}).strict()
+  .refine(({ attendeeType, institution }) => attendeeType !== "STUDENT" || Boolean(institution), {
+    message: "Institution is required for students",
+  })
 
 createWorkshopEnrollmentSchema = z.object({
   name: z.string().min(2).max(100),
@@ -60,7 +73,7 @@ verifyEmailSchema = z.object({
 
 resendVerificationSchema = z.object({
   email: z.string().email(),
-  purpose: z.enum(["RSVP", "WORKSHOP"]),
+  purpose: z.enum(["ATTENDANCE", "WORKSHOP"]),
 }).strict()
 
 registerWorkshopSchema = z.object({
@@ -73,8 +86,10 @@ submissionSchema = z.object({
   competitionPath: z.enum(["CTF", "BCC", "CP"]),
 })
 ```
-Use `.strict()` on every JSON-body schema above. Public RSVP/workshop
-enrollment accept identity; RSVP confirmation and workshop activation reject it.
+Use `.strict()` on JSON-body schemas that accept a fixed object. Public
+Attendance/workshop enrollment accept identity; Attendance confirmation and
+workshop activation reject it. The multipart submission route accepts exactly
+`competitionPath` and `file` and validates the file separately.
 Both workshop schemas require one approved path and a phone number; NIM stays
 optional.
 
@@ -108,7 +123,7 @@ Create one application/domain error type with at least:
 Do not leak stack traces, raw provider errors, secrets, cookies, or tokens to API responses.
 
 ## Suggested steps
-1. Implement all seven Zod schemas above.
+1. Implement all eight Zod schemas above.
 2. Implement `ApplicationError` and a mapper/helper from known errors to consistent JSON responses.
 3. Implement a small request-validation helper if the repo benefits from it; keep it framework-compatible with Next.js Route Handlers.
 4. Add unit tests for valid/invalid cases for each schema.
@@ -116,7 +131,7 @@ Do not leak stack traces, raw provider errors, secrets, cookies, or tokens to AP
 6. Export helpers from stable paths so feature owners do not duplicate parsing/error code.
 
 ## Boundary (what you must NOT touch)
-- Do not implement participant/RSVP business logic.
+- Do not implement participant/Attendance business logic.
 - Do not implement token generation, session, email provider, workshop persistence, invitation, R2, or submission.
 - Do not change Prisma models/migration.
 - Do not add/remove request fields beyond approved contract.
@@ -124,14 +139,15 @@ Do not leak stack traces, raw provider errors, secrets, cookies, or tokens to AP
 
 ## Done = (acceptance criteria — become tests)
 - [ ] All approved schemas exist and are importable.
-- [ ] RSVP confirmation rejects every non-empty JSON body.
+- [ ] Attendance confirmation accepts only classification fields, rejects
+  identity fields, and requires an institution for students.
 - [ ] Workshop enrollment accepts valid `name`, `email`, path, and phone number
   but does not reuse the workshop-activation schema.
 - [ ] Workshop activation requires path + phone number and rejects `name` and
   `email` if supplied.
 - [ ] Workshop schemas reject paths outside `CTF/BCC/CP` and invalid/missing
   phone numbers.
-- [ ] Resend schema accepts only a valid email plus `RSVP` or `WORKSHOP`.
+- [ ] Resend schema accepts only a valid email plus `ATTENDANCE` or `WORKSHOP`.
 - [ ] Submission schema rejects any competition path outside `CTF/BCC/CP`.
 - [ ] Invalid email is rejected.
 - [ ] Empty verification token is rejected.

@@ -11,7 +11,7 @@
 
 1. **Do not silently change product scope, API contracts, database relationships, or cross-module interfaces.**
 2. **Do not invent missing product requirements.** If a requirement is explicitly marked open/unfixed in this document, preserve it as configurable/optional or report the blocker.
-3. **Identity is collected exactly once: at the participant's first registration channel.** RSVP and public workshop enrollment may create or reuse `Participant`; session-based workshop activation and submission must not ask for or persist name/email again.
+3. **Identity is collected exactly once: at the participant's first registration channel.** Attendance and public workshop enrollment may create or reuse `Participant`; session-based workshop activation and submission must not ask for or persist name/email again.
 4. **Email verification uses a verification/magic link, not OTP.** Do not introduce OTP UI, OTP tables, or OTP endpoints.
 5. **Do not add password login, refresh-token auth, or an account system.** The approved authentication mechanism for this scope is a verified email link followed by a signed HttpOnly participant session.
 6. **A workshop registration requires a phone number and may include an optional NIM.** Store the phone number only on `WorkshopRegistration`; never log it or use it as authorization identity. Do not add WhatsApp API/SMS delivery.
@@ -44,15 +44,15 @@ Never reinterpret a lower-priority source to override a higher-priority contract
 
 SPARTA Event Platform supports three independent-but-connected journeys:
 
-1. **RSVP offline event + identity verification**
+1. **Attendance offline event + identity verification**
 2. **Online workshop path selection + gated video access**
 3. **Competition/assignment PDF submission**
 
 The core product simplification is:
 
-> A participant enters `name` and `email` once, through either RSVP or workshop enrollment. The verified `Participant` identity is then reused for RSVP, workshop activation, invitation eligibility, video access, and submission eligibility.
+> A participant enters `name` and `email` once, through either Attendance or workshop enrollment. The verified `Participant` identity is then reused for Attendance, workshop activation, invitation eligibility, video access, and submission eligibility.
 
-RSVP is the source of the offline booth list. A workshop-only participant must never receive an `Rsvp` record merely for enrolling in the online workshop.
+Attendance is the source of the offline booth list. A workshop-only participant must never receive an `Attendance` record merely for enrolling in the online workshop.
 
 ---
 
@@ -60,7 +60,7 @@ RSVP is the source of the offline booth list. A workshop-only participant must n
 
 ## In scope
 
-- RSVP using `name + email` for the offline event.
+- Attendance using `name + email` for the offline event.
 - Online workshop enrollment for exactly one selected path: `CTF`, `BCC`, or `CP`.
 - Required workshop phone number and optional NIM, stored only with the workshop registration.
 - Participant identity persistence shared by both entry channels.
@@ -116,26 +116,29 @@ Owns:
 - normalized `email`
 - `emailVerifiedAt`
 
-`Participant` is the **single source of truth** for identity. It may exist with RSVP only, workshop registration only, or both.
+`Participant` is the **single source of truth** for identity. It may exist with Attendance only, workshop registration only, or both.
 
-## RSVP
+## Attendance
 
-The participant's **offline event** RSVP state. A `Participant` may have no RSVP.
+The participant's **offline event** attendance state. A `Participant` may have no Attendance.
 
 Allowed states:
 
 - `PENDING`
 - `VERIFIED`
 
-A participant has at most one RSVP in the current scope.
+A participant has at most one Attendance in the current scope.
+
+Every Attendance records an `attendeeType` of `STUDENT` or `PUBLIC`. A student
+must also provide a non-empty `institution`; the field is optional for the public.
 
 ## EmailVerification
 
-A one-time, expiring verification-token record for either RSVP or workshop enrollment.
+A one-time, expiring verification-token record for either `ATTENDANCE` or `WORKSHOP`.
 
 The database stores only a hash of the raw token.
 
-Its `purpose` determines the post-verification redirect and whether a pending RSVP becomes `VERIFIED`.
+Its `purpose` determines the post-verification redirect and whether a pending Attendance becomes `VERIFIED`.
 
 ## Verified Session
 
@@ -147,11 +150,11 @@ The session identifies a participant; protected routes still check the participa
 
 The participant's one selected workshop path. It starts as `PENDING` for a
 new workshop-only participant and becomes `ACTIVE` after email verification.
-A verified RSVP participant can create it directly as `ACTIVE`.
+A verified Attendance participant can create it directly as `ACTIVE`.
 
 It owns the selected `competitionPath` (`CTF`, `BCC`, or `CP`), required
 `phoneNumber`, and optional `nim`. It gates the workshop video page,
-invitation UI, and submission eligibility. It does not imply RSVP attendance.
+invitation UI, and submission eligibility. It does not imply Attendance.
 
 ## Workshop Invitation
 
@@ -171,20 +174,20 @@ The binary PDF is stored in Cloudflare R2.
 # 6. End-to-End User Journey
 
 ```text
-Offline RSVP path
+Offline Attendance path
     |
     v
-RSVP form: name + email
+Attendance form: name + email + attendeeType + institution for STUDENT
     |
     v
-POST /api/rsvps -> Participant create/reuse + RSVP PENDING + RSVP verification link
+POST /api/attendances -> Participant create/reuse + Attendance PENDING + ATTENDANCE verification link
     |
     v
 GET /api/verifications/verify?token=...
     |
-    +--> consume RSVP-purpose token
+    +--> consume ATTENDANCE-purpose token
     +--> Participant.emailVerifiedAt = now
-    +--> RSVP.status = VERIFIED
+    +--> Attendance.status = VERIFIED
     +--> create participant_session cookie
     +--> 302 -> /event?verified=true
 
@@ -193,7 +196,7 @@ Online workshop path
     v
 Workshop page: choose exactly one path (CTF | BCC | CP)
     |
-    +--> verified RSVP/session
+    +--> verified Attendance/session
     |      -> submit selected path + required phoneNumber + optional nim
     |      -> ACTIVE WorkshopRegistration
     |
@@ -248,7 +251,7 @@ Primary services:
 
 ```text
 Participant Service
-RSVP Service
+Attendance Service
 Verification Link Service
 Workshop Service
 Submission Service
@@ -293,7 +296,7 @@ Service layer owns business rules and orchestration.
 Examples:
 
 - participant create/reuse;
-- RSVP duplicate behavior;
+- Attendance duplicate behavior;
 - verification-token lifecycle;
 - workshop registration eligibility;
 - submission workflow and compensating cleanup.
@@ -306,7 +309,7 @@ Prisma owns database access, relations, migration, constraints, and transactiona
 
 Notification Service is an abstraction around the configured email provider.
 
-It must not leak provider details into RSVP/verification domain logic.
+It must not leak provider details into Attendance/verification domain logic.
 
 ## R2 Storage Layer
 
@@ -319,9 +322,14 @@ R2 client/helper owns PDF validation/storage/deletion behavior, not participant 
 Implement/maintain the following domain shape unless Lead explicitly changes it.
 
 ```prisma
-enum RsvpStatus {
+enum AttendanceStatus {
   PENDING
   VERIFIED
+}
+
+enum AttendeeType {
+  STUDENT
+  PUBLIC
 }
 
 enum CompetitionPath {
@@ -331,7 +339,7 @@ enum CompetitionPath {
 }
 
 enum VerificationPurpose {
-  RSVP
+  ATTENDANCE
   WORKSHOP
 }
 
@@ -346,7 +354,7 @@ model Participant {
   email           String    @unique
   emailVerifiedAt DateTime?
 
-  rsvp                 Rsvp?
+  attendance           Attendance?
   verifications        EmailVerification[]
   workshopRegistration WorkshopRegistration?
 
@@ -354,10 +362,12 @@ model Participant {
   updatedAt DateTime @updatedAt
 }
 
-model Rsvp {
-  id            String     @id @default(cuid())
-  participantId String     @unique
-  status        RsvpStatus @default(PENDING)
+model Attendance {
+  id            String           @id @default(cuid())
+  participantId String           @unique
+  status        AttendanceStatus @default(PENDING)
+  attendeeType  AttendeeType
+  institution   String?
 
   participant Participant @relation(
     fields: [participantId],
@@ -435,9 +445,11 @@ model Submission {
 
 - `Participant.email` is unique.
 - Email must be normalized before participant lookup/persistence.
-- `Rsvp.participantId` is unique.
+- `Attendance.participantId` is unique.
+- `Attendance.attendeeType` is required; `institution` is required by the
+  request contract for `STUDENT` and optional for `PUBLIC`.
 - `WorkshopRegistration.participantId` is unique.
-- A participant may exist with no `Rsvp`, no `WorkshopRegistration`, or both.
+- A participant may exist with no `Attendance`, no `WorkshopRegistration`, or both.
 - A participant chooses exactly one workshop path: `CTF`, `BCC`, or `CP`.
 - `WorkshopRegistration.competitionPath` reuses the approved path enum so the
   group selection is server-validated rather than free text.
@@ -459,12 +471,23 @@ model Submission {
 Use strict JSON-body validation where noted so prohibited fields are rejected rather than silently discarded.
 
 ```ts
-createRsvpSchema = z.object({
+createAttendanceSchema = z.object({
   name: z.string().min(2).max(100),
   email: z.string().email(),
+  attendeeType: z.enum(["STUDENT", "PUBLIC"]),
+  institution: z.string().trim().min(1).optional(),
 }).strict()
+  .refine(({ attendeeType, institution }) => attendeeType !== "STUDENT" || Boolean(institution), {
+    message: "Institution is required for students",
+  })
 
-confirmRsvpSchema = z.object({}).strict()
+confirmAttendanceSchema = z.object({
+  attendeeType: z.enum(["STUDENT", "PUBLIC"]),
+  institution: z.string().trim().min(1).optional(),
+}).strict()
+  .refine(({ attendeeType, institution }) => attendeeType !== "STUDENT" || Boolean(institution), {
+    message: "Institution is required for students",
+  })
 
 createWorkshopEnrollmentSchema = z.object({
   name: z.string().min(2).max(100),
@@ -480,7 +503,7 @@ verifyEmailSchema = z.object({
 
 resendVerificationSchema = z.object({
   email: z.string().email(),
-  purpose: z.enum(["RSVP", "WORKSHOP"]),
+  purpose: z.enum(["ATTENDANCE", "WORKSHOP"]),
 }).strict()
 
 registerWorkshopSchema = z.object({
@@ -507,8 +530,8 @@ File validation is separate from `submissionSchema`.
 The approved API surface is:
 
 ```text
-POST /api/rsvps
-POST /api/rsvps/confirm
+POST /api/attendances
+POST /api/attendances/confirm
 POST /api/workshops/enroll
 GET  /api/verifications/verify?token=...
 POST /api/verifications/resend
@@ -521,17 +544,17 @@ Do not rename these routes without approval.
 
 ---
 
-# 12. API — RSVP and Workshop Enrollment
+# 12. API — Attendance and Workshop Enrollment
 
 The two public entry endpoints collect identity only for their own journey.
 They create or reuse the same `Participant`; neither endpoint implies the other
 journey. A frontend with an active verified session should use the session-based
 action instead of asking for identity again.
 
-## Create Offline RSVP
+## Create Offline Attendance
 
 ```http
-POST /api/rsvps
+POST /api/attendances
 Content-Type: application/json
 ```
 
@@ -540,11 +563,13 @@ Request:
 ```json
 {
   "name": "John Doe",
-  "email": "john@example.com"
+  "email": "john@example.com",
+  "attendeeType": "STUDENT",
+  "institution": "Institut Teknologi Bandung"
 }
 ```
 
-New RSVP success:
+New Attendance success:
 
 ```http
 202 Accepted
@@ -555,42 +580,45 @@ New RSVP success:
   "success": true,
   "message": "Verification link has been sent to your email",
   "data": {
-    "rsvpId": "<id>",
+    "attendanceId": "<id>",
     "status": "PENDING"
   }
 }
 ```
 
-An already-pending RSVP returns `200 OK` with the same data and a message
+An already-pending Attendance returns `200 OK` with the same data and a message
 that it is awaiting verification. It must not send another link automatically;
 the frontend uses `POST /api/verifications/resend` when the participant asks
 for a new link.
 
-RSVP business rules:
+Attendance business rules:
 
 1. Trim name and trim/lowercase email before lookup and persistence.
 2. Create a new `Participant` only when the normalized email does not exist;
    otherwise reuse it.
-3. Create one `Rsvp(status = PENDING)` only when the participant has no RSVP.
-4. Existing `PENDING` RSVP -> return it without creating another RSVP.
-5. Existing `VERIFIED` RSVP -> `409 Conflict`.
-6. A new RSVP creates an `RSVP`-purpose verification link.
+3. Create one `Attendance(status = PENDING)` only when the participant has no Attendance.
+4. Existing `PENDING` Attendance -> return it without creating another Attendance.
+5. Existing `VERIFIED` Attendance -> `409 Conflict`.
+6. A new Attendance creates an `ATTENDANCE`-purpose verification link.
 7. This route never creates `WorkshopRegistration`.
-8. Participant/RSVP/verification persistence is not rolled back merely because
+8. Participant/Attendance/verification persistence is not rolled back merely because
    external email delivery fails; the participant can resend.
 
-## Confirm Offline RSVP from a Verified Session
+## Confirm Offline Attendance from a Verified Session
 
 ```http
-POST /api/rsvps/confirm
+POST /api/attendances/confirm
 Cookie: participant_session=...
 Content-Type: application/json
 ```
 
-Request body is strictly empty:
+Request body contains only the attendance classification:
 
 ```json
-{}
+{
+  "attendeeType": "STUDENT",
+  "institution": "Institut Teknologi Bandung"
+}
 ```
 
 Success:
@@ -602,9 +630,9 @@ Success:
 ```json
 {
   "success": true,
-  "message": "RSVP confirmed",
+  "message": "Attendance confirmed",
   "data": {
-    "rsvpId": "<id>",
+    "attendanceId": "<id>",
     "status": "VERIFIED"
   }
 }
@@ -614,14 +642,15 @@ Rules:
 
 1. Resolve the participant with `requireVerifiedParticipant`; missing,
    invalid, or unverified session -> `401`.
-2. No RSVP -> create `Rsvp(status = VERIFIED)`.
-3. Existing `PENDING` RSVP -> promote it to `VERIFIED`.
-4. Existing `VERIFIED` RSVP -> `409 Conflict`.
-5. Do not accept `name`, `email`, `participantId`, or any other fields.
+2. No Attendance -> create `Attendance(status = VERIFIED)` with the submitted classification.
+3. Existing `PENDING` Attendance -> promote it to `VERIFIED` only when the saved
+   `attendeeType` and `institution` exactly match the submitted classification.
+4. Existing `VERIFIED` Attendance or a pending classification mismatch -> `409 Conflict`.
+5. Do not accept `name`, `email`, `participantId`, or any fields beyond classification.
 6. Do not create or consume a verification token: the session already proves
    the verified participant identity.
 
-This endpoint is the preferred RSVP action for a participant who first
+This endpoint is the preferred Attendance action for a participant who first
 verified through the workshop journey.
 
 ## Enroll in the Online Workshop
@@ -670,12 +699,12 @@ Rules:
 1. Trim name and trim/lowercase email before lookup and persistence. Validate
    `competitionPath` as exactly `CTF`, `BCC`, or `CP`; validate and store the
    canonical `phoneNumber`; `nim` remains optional.
-2. Create or reuse `Participant` exactly as the RSVP route does.
+2. Create or reuse `Participant` exactly as the Attendance route does.
 3. When the participant has no workshop registration, create exactly one
    `WorkshopRegistration(status = PENDING)` containing its path, phone number,
    and optional NIM.
 4. Create a fresh `WORKSHOP`-purpose verification link and send it by email.
-5. This route never creates an `Rsvp`.
+5. This route never creates an `Attendance`.
 6. A participant with an active verified session uses
    `POST /api/workshops/register` instead; the frontend need only collect the
    selected path, phone number, and optional NIM, never name/email again.
@@ -730,11 +759,11 @@ unless Backend Lead has frozen a different deployment host/path.
 - valid token -> one database transaction:
   1. set `EmailVerification.verifiedAt = now`;
   2. set `Participant.emailVerifiedAt = now` if null;
-  3. when `purpose = RSVP`, set the related pending
-     `Rsvp.status = VERIFIED`;
+  3. when `purpose = ATTENDANCE`, set the related pending
+     `Attendance.status = VERIFIED`;
   4. when `purpose = WORKSHOP`, set the participant's pending
      `WorkshopRegistration.status = ACTIVE` when one exists; never create,
-     update, or infer an `Rsvp`.
+     update, or infer an `Attendance`.
 
 After the successful transaction:
 
@@ -743,7 +772,7 @@ After the successful transaction:
 - return a `302` redirect based on token purpose:
 
 ```text
-RSVP      -> /event?verified=true
+ATTENDANCE -> /event?verified=true
 WORKSHOP  -> /workshop?verified=true
 ```
 
@@ -763,21 +792,21 @@ Request:
 ```json
 {
   "email": "john@example.com",
-  "purpose": "RSVP"
+  "purpose": "ATTENDANCE"
 }
 ```
 
-`purpose` is exactly one of `RSVP` or `WORKSHOP`.
+`purpose` is exactly one of `ATTENDANCE` or `WORKSHOP`.
 
 Rules:
 
 1. Trim/lowercase email before lookup.
-2. For `RSVP`: participant and a `PENDING` RSVP must exist. Missing RSVP ->
-   `404`; a `VERIFIED` RSVP -> `409`.
+2. For `ATTENDANCE`: participant and a `PENDING` Attendance must exist. Missing Attendance ->
+   `404`; a `VERIFIED` Attendance -> `409`.
 3. For `WORKSHOP`: participant and a `PENDING` or `ACTIVE`
    `WorkshopRegistration` must exist. A fresh link is allowed for `PENDING`
    registration and after activation so the participant can restore a session.
-   Resend never changes the saved path, phone number, NIM, RSVP, or registration
+   Resend never changes the saved path, phone number, NIM, Attendance, or registration
    state.
 4. The resend cooldown is calculated from the latest verification record for
    the same participant and purpose. A request inside the cooldown -> `429`.
@@ -813,7 +842,7 @@ type SendVerificationEmailInput = {
   to: string;
   participantName: string;
   verificationUrl: string;
-  purpose: "RSVP" | "WORKSHOP";
+  purpose: "ATTENDANCE" | "WORKSHOP";
 };
 
 sendVerificationEmail(input): Promise<void>
@@ -822,7 +851,7 @@ sendVerificationEmail(input): Promise<void>
 Email content must include:
 
 - participant name;
-- a purpose-matching CTA/link: **Verify RSVP** or **Verify Workshop Access**;
+- a purpose-matching CTA/link: **Verify Attendance** or **Verify Workshop Access**;
 - indication that link expires;
 - no OTP;
 - no workshop group invitation.
@@ -833,14 +862,14 @@ Email content must include:
 
 - Install the official Node SDK: `npm install resend`.
 - `RESEND_API_KEY` stores the Resend API key; `EMAIL_FROM` must be a verified sender on the configured Resend domain.
-- Keep Resend behind `NotificationService`; RSVP and verification services must not import the `resend` package directly.
+- Keep Resend behind `NotificationService`; Attendance and verification services must not import the `resend` package directly.
 - Use a fake notification adapter in unit tests; tests must not send live email.
 - The Resend Free plan was verified on 2026-08-07 as 3,000 emails/month, capped at 100 emails/day, with one custom domain. Upgrade before the event if expected verification traffic exceeds either limit.
 
 If provider delivery fails:
 
 - Participant/verification state remains persisted;
-- a new RSVP remains pending if it was the RSVP journey;
+- a new Attendance remains pending if it was the Attendance journey;
 - return/log a safe external-provider failure;
 - resend remains available.
 
@@ -1235,12 +1264,12 @@ Current data model allows multiple successful Submission rows per registration. 
 |---|---|
 | `200 OK` | Generic successful request |
 | `201 Created` | Resource created |
-| `202 Accepted` | RSVP or workshop enrollment accepted, awaiting verification |
+| `202 Accepted` | Attendance or workshop enrollment accepted, awaiting verification |
 | `302 Found` | Successful verification redirect or group invitation redirect |
 | `400 Bad Request` | Invalid payload, token, competition path, or file |
 | `401 Unauthorized` | Missing/invalid/unverified participant session |
 | `403 Forbidden` | Verified participant is not eligible for workshop video, invitation, or submission |
-| `404 Not Found` | Requested RSVP, participant, or resource not found |
+| `404 Not Found` | Requested Attendance, participant, or resource not found |
 | `409 Conflict` | Duplicate/already-completed state |
 | `410 Gone` | Expired verification link |
 | `429 Too Many Requests` | Verification resend/rate-limit condition |
@@ -1327,8 +1356,8 @@ The following must succeed atomically:
 ```text
 consume EmailVerification
 + verify Participant email
-+ if purpose = RSVP, mark the pending RSVP VERIFIED
-+ if purpose = WORKSHOP, activate the pending WorkshopRegistration and leave RSVP unchanged
++ if purpose = ATTENDANCE, mark the pending Attendance VERIFIED
++ if purpose = WORKSHOP, activate the pending WorkshopRegistration and leave Attendance unchanged
 ```
 
 Use a database transaction.
@@ -1338,7 +1367,7 @@ Use a database transaction.
 If email delivery fails after persistence:
 
 - do not delete the Participant;
-- do not delete the related RSVP when one exists;
+- do not delete the related Attendance when one exists;
 - do not fake verification success;
 - keep the user eligible to resend.
 
@@ -1356,8 +1385,8 @@ Treat every client value as untrusted.
 
 Perform server-side validation for:
 
-- RSVP and workshop-enrollment fields;
-- RSVP confirmation and workshop-activation payloads;
+- Attendance and workshop-enrollment fields;
+- Attendance confirmation and workshop-activation payloads;
 - required workshop phone number and selected `CTF`/`BCC`/`CP` path;
 - verification token;
 - verification purpose for resend;
@@ -1373,7 +1402,7 @@ Perform server-side validation for:
 - hashed before persistence;
 - expiring;
 - one-time use;
-- purpose-bound (`RSVP` or `WORKSHOP`);
+- purpose-bound (`ATTENDANCE` or `WORKSHOP`);
 - resend cooldown;
 - resend invalidates only tokens of the same purpose;
 - raw token absent from logs;
@@ -1465,8 +1494,8 @@ Use safe identifiers/correlation IDs if the repository already provides them.
 Rate limiting is recommended for:
 
 ```text
-POST /api/rsvps
-POST /api/rsvps/confirm
+POST /api/attendances
+POST /api/attendances/confirm
 POST /api/workshops/enroll
 POST /api/verifications/resend
 POST /api/workshops/register
@@ -1533,7 +1562,7 @@ This repository uses root-level `app/`, `services/`, `schemas/`, and `lib/` dire
 Repository root
 ├── app/
 │   ├── api/
-│   │   ├── rsvps/
+│   │   ├── attendances/
 │   │   │   ├── route.ts
 │   │   │   └── confirm/
 │   │   │       └── route.ts
@@ -1559,17 +1588,14 @@ Repository root
 │
 ├── services/
 │   ├── participant.service.ts
-│   ├── rsvp.service.ts
+│   ├── attendance.service.ts
 │   ├── verification.service.ts
 │   ├── workshop.service.ts
 │   ├── submission.service.ts
 │   └── notification.service.ts
 │
 ├── schemas/
-│   ├── rsvp.schema.ts
-│   ├── verification.schema.ts
-│   ├── workshop.schema.ts
-│   └── submission.schema.ts
+│   └── index.ts
 │
 ├── lib/
 │   ├── prisma.ts
@@ -1580,12 +1606,6 @@ Repository root
 ├── errors/
 │   └── application-error.ts
 │
-└── types/
-    ├── participant.ts
-    ├── rsvp.ts
-    ├── workshop.ts
-    └── submission.ts
-
 prisma/
 ├── schema.prisma
 └── migrations/
@@ -1639,7 +1659,7 @@ Integration merges follow this dependency order:
         |
         v
 3. BE-03
-   Participant + RSVP + Workshop Enrollment
+   Participant + Attendance + Workshop Enrollment
         |
         v
 4. BE-04
@@ -1686,10 +1706,10 @@ Do not use this sequence as permission to rewrite a previous owner's domain. Cro
 |---|---|---|
 | `S1-BE-01` | BE-01 | Prisma schema, migration, DB constraints/indexes |
 | `S1-BE-02` | BE-02 | Zod schemas, ApplicationError, shared response/validation helpers |
-| `S1-BE-03` | BE-03 | Participant/RSVP services, RSVP create + confirmation service, workshop enrollment route |
+| `S1-BE-03` | BE-03 | Participant/Attendance services, Attendance create + confirmation service, workshop enrollment route |
 | `S1-BE-04` | BE-04 | Purpose-bound verification token lifecycle, generic verify/resend routes |
 | `S1-BE-05` | BE-05 | Email adapter, Notification Service, verification-email wiring |
-| `S1-BE-06` | BE-06 | Signed session/cookie, verified participant resolver, generic verification success + RSVP-confirmation route |
+| `S1-BE-06` | BE-06 | Signed session/cookie, verified participant resolver, generic verification success + Attendance-confirmation route |
 | `S1-BE-07` | BE-07 | Workshop activation service/route, reusable video-access eligibility |
 | `S1-BE-08` | BE-08 | Authenticated invitation redirect |
 | `S1-BE-09` | BE-09 | PDF validation + R2 upload/delete abstraction |
@@ -1704,10 +1724,10 @@ These are approved cross-owner touch points.
 ## BE-04 / BE-05 into identity-entry routes
 
 BE-04/BE-05 may wire verification creation/email dispatch into the approved
-dispatch call sites of `POST /api/rsvps` and `POST /api/workshops/enroll`.
+dispatch call sites of `POST /api/attendances` and `POST /api/workshops/enroll`.
 
-They may not rewrite participant creation, RSVP duplicate rules, or the rule
-that workshop enrollment creates no RSVP and exactly one pending workshop
+They may not rewrite participant creation, Attendance duplicate rules, or the rule
+that workshop enrollment creates no Attendance and exactly one pending workshop
 registration for a new workshop-only participant.
 
 ## BE-05 into generic resend verification
@@ -1725,11 +1745,12 @@ participant session cookie and redirect based on the verified token purpose.
 BE-06 may not alter verification-token validation, purpose branching, or
 transaction semantics.
 
-## BE-06 into RSVP confirmation
+## BE-06 into Attendance confirmation
 
-BE-06 owns `POST /api/rsvps/confirm`: it validates an empty body, resolves the
-verified session, and calls BE-03's reusable RSVP-confirmation service with the
-trusted participant ID. It may not change BE-03 RSVP state rules.
+BE-06 owns `POST /api/attendances/confirm`: it validates classification-only input,
+resolves the verified session, and calls BE-03's reusable Attendance-confirmation
+service with the trusted participant ID. It may not change the pending
+classification-match or verified-conflict rules.
 
 ## BE-08 / BE-10 consuming Workshop Service
 
@@ -1758,13 +1779,13 @@ Before business flow integration:
 Must work:
 
 ```text
-POST /api/rsvps
+POST /api/attendances
 -> Participant
--> RSVP PENDING
+-> Attendance PENDING
 
 POST /api/workshops/enroll
 -> Participant
--> no RSVP
+-> no Attendance
 -> PENDING WorkshopRegistration with CTF/BCC/CP path, phone number, optional NIM
 ```
 
@@ -1773,12 +1794,12 @@ POST /api/workshops/enroll
 Must work:
 
 ```text
-RSVP
+ATTENDANCE
 -> verification link
 -> verification email
 -> verify URL
 -> Participant verified
--> RSVP VERIFIED
+-> Attendance VERIFIED
 -> participant_session cookie
 
 Workshop enrollment
@@ -1787,7 +1808,7 @@ Workshop enrollment
 -> verify URL
 -> Participant verified
 -> PENDING WorkshopRegistration becomes ACTIVE
--> no RSVP mutation
+-> no Attendance mutation
 -> participant_session cookie
 ```
 
@@ -1841,29 +1862,31 @@ A task/change is not done until all relevant items pass:
 
 Before release, verify at least:
 
-## RSVP
+## Attendance
 
-- valid RSVP creates Participant + PENDING RSVP;
-- valid `POST /api/rsvps/confirm` from a workshop-verified session creates or
-  promotes one RSVP to VERIFIED without receiving identity fields;
+- valid Attendance creates Participant + PENDING Attendance with an attendee
+  classification and an institution for `STUDENT`;
+- valid `POST /api/attendances/confirm` from a workshop-verified session creates or
+  promotes one Attendance to VERIFIED from classification-only input, requiring
+  an exact match for a pending row and rejecting a verified row;
 - same email casing variant does not create duplicate Participant;
-- repeated PENDING RSVP does not create second RSVP;
-- existing VERIFIED RSVP returns `409`;
+- repeated PENDING Attendance does not create second Attendance;
+- existing VERIFIED Attendance returns `409`;
 - invalid body returns `400`.
 
 ## Verification
 
-- valid RSVP-purpose token verifies token + Participant + RSVP;
+- valid ATTENDANCE-purpose token verifies token + Participant + Attendance;
 - valid WORKSHOP-purpose token verifies token + Participant but does not
-  create/update RSVP and activates the related pending workshop registration;
+  create/update Attendance and activates the related pending workshop registration;
 - valid verification creates signed session;
-- RSVP and WORKSHOP verification redirect to their respective frontend paths;
+- ATTENDANCE and WORKSHOP verification redirect to their respective frontend paths;
 - random token rejected;
 - expired token returns `410`;
 - used token cannot be reused;
-- resend on VERIFIED RSVP returns `409`;
+- resend on VERIFIED Attendance returns `409`;
 - workshop-purpose resend is allowed for an existing participant to restore a
-  session and does not create RSVP or change the saved workshop registration;
+  session and does not create Attendance or change the saved workshop registration;
 - resend inside cooldown returns `429`;
 - resend invalidates only an old unused token with the same purpose and creates
   one new usable token.
@@ -1879,12 +1902,12 @@ Before release, verify at least:
 ## Workshop enrollment
 
 - workshop enrollment creates/reuses Participant and sends a WORKSHOP link;
-- workshop-only enrollment creates no RSVP and one PENDING workshop registration;
+- workshop-only enrollment creates no Attendance and one PENDING workshop registration;
 - workshop path accepts only `CTF`, `BCC`, or `CP`;
 - workshop phone number is required, validated, stored only on registration,
   and absent from logs/errors;
-- a WORKSHOP link can be used by an existing RSVP participant without mutating
-  the RSVP.
+- a WORKSHOP link can be used by an existing Attendance participant without mutating
+  the Attendance.
 
 ## Workshop activation and video
 
@@ -1979,7 +2002,7 @@ the workshop registration.
 
 ## Rate-limit implementation/provider
 
-Rate limiting is recommended, especially on RSVP/resend, but exact middleware/provider is not frozen in current work orders.
+Rate limiting is recommended, especially on Attendance/resend, but exact middleware/provider is not frozen in current work orders.
 
 Do not introduce infrastructure without approval.
 
@@ -2023,9 +2046,9 @@ Do **not** make these “helpful” changes:
     -> WRONG: identity comes from the verified session; only public workshop
        enrollment collects name and email.
 
-"Workshop enrollment should create an RSVP too"
+"Workshop enrollment should create an Attendance too"
     -> WRONG: workshop-only participants must not appear in the offline booth
-       RSVP list.
+       Attendance list.
 
 "Submission should accept participantId"
     -> WRONG: authorization identity comes from session.
@@ -2089,10 +2112,10 @@ For every merge, review at minimum:
 The release is successful only when this complete path works:
 
 ```text
-Offline RSVP
-  -> RSVP-purpose Email Verification Link
+Offline Attendance with attendee classification
+  -> ATTENDANCE-purpose Email Verification Link
   -> Verified Participant Session
-  -> Offline RSVP confirmed
+  -> Offline Attendance confirmed
 
 Online workshop
   -> Select one path (CTF | BCC | CP) + required phoneNumber + optional NIM
@@ -2118,9 +2141,9 @@ If you remember only one model, use this:
 IDENTITY
 Participant(name, email, verified)
         |
-        +--> RSVP (optional: PENDING -> VERIFIED)
+        +--> Attendance (optional: PENDING -> VERIFIED; student requires institution)
         |
-        +--> Workshop enrollment (never creates RSVP)
+        +--> Workshop enrollment (never creates Attendance)
         |
         v
 MAGIC LINK

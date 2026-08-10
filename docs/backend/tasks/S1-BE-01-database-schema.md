@@ -14,13 +14,13 @@
 
 
 ## Goal (1 sentence)
-Provide one clean Prisma schema and initial migration that all backend features can build on without redefining participant, RSVP, verification, workshop, or submission data.
+Provide one clean Prisma schema and initial migration that all backend features can build on without redefining participant, Attendance, verification, workshop, or submission data.
 
 ## Context you need to know
 - `Participant` is the single source of truth for `name`, `email`, and `emailVerifiedAt`.
-- Name and email are collected once through RSVP or public workshop enrollment.
-  A workshop-only participant may have no RSVP.
-- One participant has at most one RSVP and one workshop registration in the current project scope.
+- Name and email are collected once through Attendance or public workshop enrollment.
+  A workshop-only participant may have no Attendance.
+- One participant has at most one Attendance and one workshop registration in the current project scope.
 - A workshop registration stores exactly one selected path (`CTF`, `BCC`, or
   `CP`), a required phone number, optional NIM, and access status.
 - Verification tokens are stored only as hashes; raw tokens must never be persisted.
@@ -29,9 +29,14 @@ Provide one clean Prisma schema and initial migration that all backend features 
 
 ## Required schema — implement exactly this domain shape
 ```prisma
-enum RsvpStatus {
+enum AttendanceStatus {
   PENDING
   VERIFIED
+}
+
+enum AttendeeType {
+  STUDENT
+  PUBLIC
 }
 
 enum CompetitionPath {
@@ -46,7 +51,7 @@ enum WorkshopRegistrationStatus {
 }
 
 enum VerificationPurpose {
-  RSVP
+  ATTENDANCE
   WORKSHOP
 }
 
@@ -56,7 +61,7 @@ model Participant {
   email           String    @unique
   emailVerifiedAt DateTime?
 
-  rsvp                 Rsvp?
+  attendance           Attendance?
   verifications        EmailVerification[]
   workshopRegistration WorkshopRegistration?
 
@@ -64,10 +69,12 @@ model Participant {
   updatedAt DateTime @updatedAt
 }
 
-model Rsvp {
-  id            String     @id @default(cuid())
-  participantId String     @unique
-  status        RsvpStatus @default(PENDING)
+model Attendance {
+  id            String           @id @default(cuid())
+  participantId String           @unique
+  status        AttendanceStatus @default(PENDING)
+  attendeeType  AttendeeType
+  institution   String?
 
   participant Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
 
@@ -147,12 +154,14 @@ model Submission {
 - [ ] Migration applies successfully to an empty PostgreSQL database.
 - [ ] Migration can be replayed from scratch without manual SQL fixes.
 - [ ] `Participant.email` is unique.
-- [ ] `Rsvp.participantId` is unique.
+- [ ] `Attendance.participantId` is unique.
 - [ ] `WorkshopRegistration.participantId` is unique.
 - [ ] `WorkshopRegistration` has required `competitionPath` and `phoneNumber`,
   optional `nim`, and `PENDING`/`ACTIVE` status with default `PENDING`.
 - [ ] `CompetitionPath` contains exactly `CTF`, `BCC`, and `CP`.
-- [ ] `VerificationPurpose` contains exactly `RSVP` and `WORKSHOP`.
+- [ ] `VerificationPurpose` contains exactly `ATTENDANCE` and `WORKSHOP`.
+- [ ] `Attendance` stores `attendeeType`; `institution` is present for a
+  `STUDENT` and absent/optional for `PUBLIC` according to the request contract.
 - [ ] `EmailVerification.purpose` is required and supports purpose-specific
   verification/resend queries.
 - [ ] Raw verification token has no database column; only `tokenHash` exists.

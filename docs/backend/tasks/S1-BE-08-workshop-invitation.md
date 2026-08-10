@@ -20,7 +20,7 @@ their saved path, without using a WhatsApp API.
 ## Context you need to know
 - Frontend button should point to this backend endpoint, not embed the secret group URL directly in public frontend code.
 - Backend must check session + `ACTIVE` WorkshopRegistration on every request;
-  RSVP is never an invitation prerequisite.
+  Attendance is never an invitation prerequisite.
 - Invitation links are server configuration, one URL per saved path:
 ```env
 WORKSHOP_CTF_COMMUNITY_LINK=<actual CTF invitation URL>
@@ -44,7 +44,7 @@ Behavior:
 1. session missing/invalid/unverified → `401`.
 2. verified participant but no `ACTIVE` WorkshopRegistration → `403`.
 3. active registered participant → `302 Found` with `Location: <saved-path group URL>`.
-4. server config missing/invalid → safe `500` and log configuration error without exposing secrets beyond the intended redirect URL.
+4. server config missing/invalid → safe `500` without exposing an invitation URL.
 
 ## Security requirements
 - Do not return the invitation URL in a JSON body on failure.

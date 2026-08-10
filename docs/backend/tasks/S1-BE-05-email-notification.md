@@ -6,7 +6,7 @@
 - **Sprint:** 1
 - **Merge order:** 5
 - **Depends on:** BE-04 server-side verification URL contract
-- **Blocks:** complete RSVP, workshop-enrollment, and resend email delivery in integration
+- **Blocks:** complete Attendance, workshop-enrollment, and resend email delivery in integration
 - **Contract:** `NotificationService.sendVerificationEmail(...)`
 - **Owned files:** `lib/email.ts`, `services/notification.service.ts`, email template/helper files, email tests
 
@@ -14,16 +14,16 @@
 
 
 ## Goal (1 sentence)
-Provide one server-side email abstraction that reliably sends the verification link without coupling RSVP/verification business logic to a vendor.
+Provide one server-side email abstraction that reliably sends the verification link without coupling Attendance/verification business logic to a vendor.
 
 ## Context you need to know
 - Only email notification is in scope; WhatsApp provider/API is explicitly out of scope.
 - BE-04 produces the verification URL; this module receives it and delivers it.
 - Participant/verification persistence is not rolled back because provider calls are
-  external. A new RSVP remains `PENDING` when the RSVP journey was used.
+  external. A new Attendance remains `PENDING` when the Attendance journey was used.
 - A new workshop enrollment likewise keeps its `PENDING` workshop registration
   when email delivery fails.
-- Resend is the approved Sprint 1 provider. Use the official `resend` SDK behind the Notification Service; RSVP and verification modules must not import the SDK directly.
+- Resend is the approved Sprint 1 provider. Use the official `resend` SDK behind the Notification Service; Attendance and verification modules must not import the SDK directly.
 
 ## Required configuration
 ```env
@@ -39,7 +39,7 @@ type SendVerificationEmailInput = {
   to: string;
   participantName: string;
   verificationUrl: string;
-  purpose: "RSVP" | "WORKSHOP";
+  purpose: "ATTENDANCE" | "WORKSHOP";
 };
 
 sendVerificationEmail(input): Promise<void>
@@ -53,14 +53,14 @@ Rules:
 ## Email content requirements
 Keep content minimal and functional:
 - participant name (escaped by templating mechanism);
-- purpose-matching CTA/link: "Verify RSVP" or "Verify Workshop Access";
+- purpose-matching CTA/link: "Verify Attendance" or "Verify Workshop Access";
 - statement that link expires (do not hardcode duration in prose unless generated from config);
 - no OTP field/code;
 - no workshop group invitation.
 
 ## Integration tasks owned by BE-05
 After core adapter tests pass, wire the adapter at exactly these call sites:
-1. `POST /api/rsvps` after BE-03 successfully creates/gets a PENDING RSVP and BE-04 creates a fresh verification link.
+1. `POST /api/attendances` after BE-03 successfully creates/gets a PENDING Attendance and BE-04 creates a fresh verification link.
 2. `POST /api/workshops/enroll` after BE-03 creates/reuses Participant plus a
    `PENDING` WorkshopRegistration and BE-04 creates a fresh WORKSHOP-purpose
    link.
@@ -68,7 +68,7 @@ After core adapter tests pass, wire the adapter at exactly these call sites:
    checks and creates a fresh link.
 
 If email delivery fails:
-- keep Participant/verification DB state intact; keep RSVP pending when one was
+- keep Participant/verification DB state intact; keep Attendance pending when one was
   created and keep a new workshop registration pending;
 - return safe provider failure according to shared error mapping;
 - user can use resend flow later.
@@ -84,7 +84,7 @@ If email delivery fails:
 
 ## Boundary (what you must NOT touch)
 - Do not generate/hash/validate verification tokens.
-- Do not change RSVP persistence rules.
+- Do not change Attendance persistence rules.
 - Do not create session cookies.
 - Do not add WhatsApp API or process/store phone number in this email module.
 - Do not send workshop invitation by email unless PM changes scope.
@@ -92,12 +92,12 @@ If email delivery fails:
 
 ## Done = (acceptance criteria — become tests)
 - [ ] `sendVerificationEmail` can be mocked independently of provider SDK.
-- [ ] Successful RSVP calls email adapter exactly once with participant email + generated verification URL.
+- [ ] Successful Attendance calls email adapter exactly once with participant email + generated verification URL.
 - [ ] Successful workshop enrollment calls email adapter exactly once with
-  purpose `WORKSHOP`, one pending workshop registration, and no RSVP creation.
+  purpose `WORKSHOP`, one pending workshop registration, and no Attendance creation.
 - [ ] Resend calls email adapter exactly once only after resend eligibility passes.
 - [ ] Provider failure does not delete Participant/verification records or a
-  related pending RSVP.
+  related pending Attendance.
 - [ ] Provider failure is returned/logged safely without API key or raw token.
 - [ ] Email body contains clickable purpose-matching verification URL and no OTP.
 - [ ] No WhatsApp dependency or credential is introduced.

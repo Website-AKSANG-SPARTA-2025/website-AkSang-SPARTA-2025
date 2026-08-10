@@ -20,7 +20,7 @@ persisting database metadata without asking for email again.
 ## Context you need to know
 Request identity comes from `participant_session` only.
 A verified workshop-only participant with an `ACTIVE` WorkshopRegistration is
-eligible; RSVP is not required for submission.
+eligible; Attendance is not required for submission.
 Request fields are exactly:
 ```text
 competitionPath
@@ -81,9 +81,9 @@ Invalid file:
 ```text
 1. requireVerifiedParticipant(request)
 2. find ACTIVE WorkshopRegistration by participantId
-3. if absent -> 403 and STOP (do not upload)
-4. parse/validate competitionPath
-5. extract file
+3. if absent -> 403 and STOP (do not parse multipart or upload)
+4. parse exactly one `competitionPath` and one `file`; reject unsupported or duplicate fields
+5. validate competitionPath and extract a `File`
 6. BE-09 validatePdf
 7. BE-09 uploadPdf -> storage metadata
 8. insert Submission DB metadata
@@ -97,9 +97,10 @@ catch DB error
    ↓
 await deleteObject(storageKey)
    ↓
-rethrow safe DB/application error
+rethrow the original error; the route maps unknown failures to a safe response
 ```
-If cleanup itself fails, log both the DB failure context and cleanup failure **without** secrets/file bytes; still return safe error to client.
+If cleanup itself fails, log only both error class names (no messages, secrets,
+file bytes, object key, or identity data); still return a safe error to client.
 
 ## Submission record mapping
 Persist exactly:

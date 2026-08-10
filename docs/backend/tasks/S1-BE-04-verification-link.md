@@ -30,7 +30,7 @@ Required behavior:
 
 - implement secure token generation, hashing, expiry, and one-time use;
 - implement `createVerification`, `verifyToken`, and resend eligibility;
-- keep RSVP and WORKSHOP purpose mutations isolated and transactional;
+- keep ATTENDANCE and WORKSHOP purpose mutations isolated and transactional;
 - return only typed server-internal results required by BE-05/BE-06;
 - ensure raw token and verification URL never enter public JSON or logs.
 
@@ -57,12 +57,12 @@ boundary require approval from both PICs and Backend Lead.
 
 
 ## Goal (1 sentence)
-Create secure, expiring, one-time verification links for RSVP or workshop enrollment, with purpose-isolated resend behavior.
+Create secure, expiring, one-time verification links for Attendance or workshop enrollment, with purpose-isolated resend behavior.
 
 ## Context you need to know
 - Raw token must exist only transiently so it can be placed in the email URL; database stores only SHA-256 (or stronger fixed-output cryptographic hash) of the token.
 - Verification success always marks token used and participant verified. It marks
-  RSVP verified only when `purpose = RSVP`; `WORKSHOP` never mutates RSVP and
+  Attendance verified only when `purpose = ATTENDANCE`; `WORKSHOP` never mutates Attendance and
   activates an existing pending workshop registration.
 - Session cookie creation is owned by BE-06 and is wired after this task via an explicit integration exception.
 - Email delivery is owned by BE-05. This task returns an internal `verificationUrl`/raw token **only to server-side caller**, never in public API JSON.
@@ -96,13 +96,13 @@ Behavior:
 - valid → transaction:
   1. set `EmailVerification.verifiedAt = now`;
   2. set `Participant.emailVerifiedAt = now` if null;
-  3. if `purpose = RSVP`, set the related pending `Rsvp.status = VERIFIED`;
+  3. if `purpose = ATTENDANCE`, set the related pending `Attendance.status = VERIFIED`;
   4. if `purpose = WORKSHOP`, change an existing pending
-     `WorkshopRegistration` to `ACTIVE` and leave RSVP unchanged.
+     `WorkshopRegistration` to `ACTIVE` and leave Attendance unchanged.
 - after transaction, return a typed internal result containing `participantId` and
   `purpose` for BE-06 session integration.
 - final HTTP success after BE-06 integration: session cookie plus `302` to
-  `/event?verified=true` for RSVP or `/workshop?verified=true` for WORKSHOP.
+  `/event?verified=true` for Attendance or `/workshop?verified=true` for WORKSHOP.
 
 ## Resend endpoint
 ```http
@@ -111,16 +111,16 @@ Content-Type: application/json
 ```
 Request:
 ```json
-{ "email": "john@example.com", "purpose": "RSVP" }
+{ "email": "john@example.com", "purpose": "ATTENDANCE" }
 ```
 Rules:
 - Normalize email before lookup.
-- `purpose = RSVP`: Participant and `PENDING` RSVP must exist; missing RSVP ->
-  `404`, verified RSVP -> `409`.
+- `purpose = ATTENDANCE`: Participant and `PENDING` Attendance must exist; missing Attendance ->
+  `404`, verified Attendance -> `409`.
 - `purpose = WORKSHOP`: Participant and a `PENDING` or `ACTIVE`
   WorkshopRegistration must exist. Allow a fresh link while pending and after
   activation to restore a session. Do not change saved path, phone number, NIM,
-  RSVP, or registration status during resend.
+  Attendance, or registration status during resend.
 - Enforce cooldown using the most recent EmailVerification for the same
   participant and purpose; request inside it -> `429`.
 - Invalidate only still-unused verification records for the same participant
@@ -149,7 +149,7 @@ Rules:
 
 ## Integration exceptions for later owners
 - BE-05 may edit the generic resend route and the two public-entry call sites
-  (`/api/rsvps`, `/api/workshops/enroll`) only to call
+  (`/api/attendances`, `/api/workshops/enroll`) only to call
   `sendVerificationEmail(...)` with the URL/purpose produced here.
 - BE-06 may edit only the successful generic verify-route branch to set the
   verified session cookie and redirect from the returned purpose.
@@ -158,7 +158,7 @@ Rules:
 ## Boundary (what you must NOT touch)
 - Do not send email directly to provider.
 - Do not implement WhatsApp.
-- Do not create RSVP or a new WorkshopRegistration. The only workshop mutation
+- Do not create Attendance or a new WorkshopRegistration. The only workshop mutation
   allowed here is atomically promoting an existing `PENDING` registration to
   `ACTIVE` after a valid WORKSHOP-purpose token.
 - Do not implement submission logic.
@@ -168,16 +168,16 @@ Rules:
 
 ## Done = (acceptance criteria — become tests)
 - [ ] DB contains token hash, never raw token.
-- [ ] RSVP-purpose token marks token, Participant, and pending RSVP in one
+- [ ] ATTENDANCE-purpose token marks token, Participant, and pending Attendance in one
   transaction.
 - [ ] WORKSHOP-purpose token marks token and Participant, promotes the pending
-  WorkshopRegistration to `ACTIVE`, and never mutates RSVP.
+  WorkshopRegistration to `ACTIVE`, and never mutates Attendance.
 - [ ] Used token cannot be used twice.
 - [ ] Expired token returns `410`.
 - [ ] Random/unknown token returns `400`.
-- [ ] Resend on VERIFIED RSVP returns `409`.
+- [ ] Resend on VERIFIED Attendance returns `409`.
 - [ ] WORKSHOP resend requires an existing pending/active registration and
-  creates no RSVP or additional WorkshopRegistration.
+  creates no Attendance or additional WorkshopRegistration.
 - [ ] Resend within cooldown returns `429`.
 - [ ] Successful resend invalidates only previous unused token(s) with the same
   purpose and creates exactly one new usable token.

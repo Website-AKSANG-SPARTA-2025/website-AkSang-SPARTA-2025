@@ -37,7 +37,7 @@ client, or public URLs to deliver protected workshop video.
 Provide equivalent server-only functions:
 ```ts
 type UploadPdfInput = {
-  bytes: Uint8Array | Buffer;
+  bytes: Uint8Array;
   originalFileName: string;
   contentType: string;
 };
@@ -45,7 +45,7 @@ type UploadPdfInput = {
 type StoredObject = {
   storageKey: string;
   fileName: string;      // sanitized original display name
-  contentType: string;   // application/pdf
+  contentType: "application/pdf";
   size: number;
 };
 
@@ -66,7 +66,8 @@ deleteObject(storageKey: string): Promise<void>
 ## Error semantics
 - missing/empty/invalid PDF → application error mapped to `400`.
 - oversized → `400` with safe message.
-- R2 provider failure → safe `502`/`500` according to shared external-provider mapping.
+- R2 upload-provider failure → `502` with a safe external-provider message.
+- Missing server configuration remains a safe generic `500` at the route boundary.
 - delete cleanup failure should be logged as an operational error, not silently swallowed.
 
 ## Suggested steps

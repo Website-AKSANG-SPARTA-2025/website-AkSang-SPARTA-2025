@@ -27,7 +27,7 @@ page.
 - One participant has one WorkshopRegistration in current scope.
 - This session-based route creates an `ACTIVE` registration. Only `ACTIVE`
   registration unlocks video, invitation, and submission eligibility.
-- RSVP is not a workshop prerequisite. Any verified participant with no
+- Attendance is not a workshop prerequisite. Any verified participant with no
   registration may activate workshop access through this route.
 
 ## Endpoint contract
@@ -112,7 +112,7 @@ reaching into registration route logic. It returns only an `ACTIVE` registration
 - Do not accept name/email in workshop body.
 - Do not accept an arbitrary path or optional phone number; use the shared path
   enum and required phone-number schema.
-- Do not require RSVP for workshop activation.
+- Do not require Attendance for workshop activation.
 - Do not send invitation through WhatsApp/email.
 - Do not expose any `WORKSHOP_*_COMMUNITY_LINK` here.
 - Do not expose raw video-provider/storage URLs here.

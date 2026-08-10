@@ -12,39 +12,40 @@ yang tidak boleh diubah, baca [BACKEND.md](./BACKEND.md). Jika ada perbedaan,
 
 Backend ini mendukung tiga perjalanan peserta yang saling terhubung:
 
-1. RSVP acara offline dengan verifikasi email.
+1. Attendance acara offline dengan verifikasi email.
 2. Pendaftaran satu workshop: `CTF`, `BCC`, atau `CP`.
 3. Pengumpulan file PDF untuk jalur kompetisi/assignment.
 
 Prinsip terpentingnya sederhana: peserta memasukkan `name` dan `email` hanya
-sekali. Di halaman workshop, peserta memilih satu tombol path. Peserta dengan
-session RSVP yang sudah terverifikasi hanya mengisi nomor HP wajib dan NIM
-opsional; peserta baru juga mengisi nama dan email.
+sekali. Attendance juga meminta `attendeeType`; `STUDENT` wajib mengisi
+`institution`. Di halaman workshop, peserta memilih satu tombol path. Peserta
+dengan session Attendance yang sudah terverifikasi hanya mengisi nomor HP wajib
+dan NIM opsional; peserta baru juga mengisi nama dan email.
 
 ```mermaid
 flowchart TB
     start["Peserta memilih perjalanan"] --> choice{"Jenis perjalanan"}
 
-    choice --> rsvpForm["RSVP: nama dan email"]
-    rsvpForm --> rsvpPending["RSVP berstatus PENDING"]
-    rsvpPending --> rsvpLink["Magic link tujuan RSVP"]
-    rsvpLink --> rsvpSession["Participant terverifikasi dan session dibuat"]
-    rsvpSession --> event["RSVP terkonfirmasi"]
-    rsvpSession --> rsvpWorkshop["Klik CTF, BCC, atau CP + nomor HP wajib + NIM opsional"]
-    rsvpWorkshop --> rsvpActive["WorkshopRegistration ACTIVE"]
+    choice --> AttendanceForm["Attendance: nama, email, attendeeType, institution untuk STUDENT"]
+    AttendanceForm --> AttendancePending["Attendance berstatus PENDING"]
+    AttendancePending --> AttendanceLink["Magic link tujuan ATTENDANCE"]
+    AttendanceLink --> AttendanceSession["Participant terverifikasi dan session dibuat"]
+    AttendanceSession --> event["Attendance terkonfirmasi"]
+    AttendanceSession --> AttendanceWorkshop["Klik CTF, BCC, atau CP + nomor HP wajib + NIM opsional"]
+    AttendanceWorkshop --> AttendanceActive["WorkshopRegistration ACTIVE"]
 
     choice --> workshopForm["Klik CTF, BCC, atau CP + nama, email, nomor HP wajib, NIM opsional"]
     workshopForm --> workshopPending["WorkshopRegistration PENDING"]
     workshopPending --> workshopLink["Magic link tujuan WORKSHOP"]
     workshopLink --> workshopActive["WorkshopRegistration ACTIVE + session dibuat"]
 
-    rsvpActive --> protectedAccess["Video, invitation card, dan submission terlindungi"]
+    AttendanceActive --> protectedAccess["Video, invitation card, dan submission terlindungi"]
     workshopActive --> protectedAccess
     protectedAccess --> invitation["Tombol invitation -> redirect backend ke grup path terpilih"]
 ```
 
 Peserta yang hanya mendaftar workshop tetap memiliki `Participant`, tetapi
-**tidak** otomatis memiliki `Rsvp`. Sebaliknya, peserta RSVP terverifikasi dapat
+**tidak** otomatis memiliki `Attendance`. Sebaliknya, peserta Attendance terverifikasi dapat
 mendaftar workshop tanpa memasukkan ulang nama atau email.
 
 ## Arsitektur singkat
@@ -97,7 +98,7 @@ controller HTTP. Route Handler menerima request, memvalidasi input, membaca
 session, memanggil service, lalu mengembalikan JSON, redirect, atau cookie.
 
 Service menyimpan aturan bisnis yang dapat dipakai ulang, misalnya membuat
-RSVP, memverifikasi token, mencari workshop registration, atau menyimpan
+Attendance, memverifikasi token, mencari workshop registration, atau menyimpan
 submission. Menambahkan controller terpisah saat ini hanya akan menghasilkan
 lapisan tambahan tanpa tanggung jawab baru:
 
@@ -112,10 +113,10 @@ baru tanpa persetujuan Backend Lead.
 
 | Lapisan | Tanggung jawab | Contoh yang tidak boleh dilakukan |
 |---|---|---|
-| Route Handler | Parsing HTTP, validasi, session resolution, status/JSON/redirect/cookie | Menulis aturan RSVP atau langsung memanggil Resend/R2 |
+| Route Handler | Parsing HTTP, validasi, session resolution, status/JSON/redirect/cookie | Menulis aturan Attendance atau langsung memanggil Resend/R2 |
 | Zod schema | Memastikan bentuk request valid | Menentukan peserta boleh akses workshop atau tidak |
 | Service | Aturan bisnis dan orkestrasi | Mengakses raw HTTP request atau environment variable provider |
-| `lib/` | Prisma, session signing, email, R2, environment | Menentukan kebijakan peserta/RSVP |
+| `lib/` | Prisma, session signing, email, R2, environment | Menentukan kebijakan peserta/Attendance |
 | Prisma | Model, migration, unique constraint, relasi | Mengatur response API |
 
 Contoh alur sebuah request terlindungi:
@@ -142,8 +143,8 @@ identitas dari session yang sudah diverifikasi.
 | Istilah | Arti singkat |
 |---|---|
 | `Participant` | Satu sumber identitas: nama, email yang dinormalisasi, dan status verifikasi email. |
-| `Rsvp` | Status kehadiran offline: `PENDING` atau `VERIFIED`. Maksimal satu untuk setiap participant. |
-| `EmailVerification` | Token magic link sekali pakai, memiliki expiry dan tujuan `RSVP` atau `WORKSHOP`. Hanya hash token yang disimpan. |
+| `Attendance` | Status kehadiran offline: `PENDING` atau `VERIFIED`, dengan `attendeeType` `STUDENT`/`PUBLIC`; `STUDENT` wajib memiliki `institution`. Maksimal satu untuk setiap participant. |
+| `EmailVerification` | Token magic link sekali pakai, memiliki expiry dan tujuan `ATTENDANCE` atau `WORKSHOP`. Hanya hash token yang disimpan. |
 | `WorkshopRegistration` | Satu pilihan path (`CTF`/`BCC`/`CP`), nomor HP wajib, NIM opsional, dan status `PENDING` atau `ACTIVE`. Hanya `ACTIVE` yang memberi akses terlindungi. |
 | `Submission` | Metadata PDF yang tersimpan di PostgreSQL; file PDF-nya sendiri berada di Cloudflare R2. |
 
@@ -153,8 +154,8 @@ Jangan menambah atau mengganti endpoint tanpa persetujuan.
 
 | Endpoint | Kegunaan | Perlu session? |
 |---|---|---|
-| `POST /api/rsvps` | Membuat atau memakai ulang participant dan RSVP pending | Tidak |
-| `POST /api/rsvps/confirm` | Membuat/mempromosikan RSVP melalui session verified | Ya |
+| `POST /api/attendances` | Membuat atau memakai ulang participant dan Attendance pending dengan klasifikasi peserta | Tidak |
+| `POST /api/attendances/confirm` | Membuat/mempromosikan Attendance melalui session verified dengan klasifikasi yang cocok | Ya |
 | `POST /api/workshops/enroll` | Mendaftarkan peserta baru ke satu path workshop dan membuat registration `PENDING` | Tidak |
 | `GET /api/verifications/verify?token=...` | Mengonsumsi magic link dan membuat session | Tidak |
 | `POST /api/verifications/resend` | Mengirim magic link baru sesuai purpose | Tidak |
@@ -280,8 +281,9 @@ Invitation memakai tiga URL server-only: `WORKSHOP_CTF_COMMUNITY_LINK`,
 prefix environment publik atau memasukkan URL grup ke bundle frontend.
 
 Untuk upload PDF dari backend lokal, Backend Lead menyiapkan satu bucket private
-R2 khusus development. Ikuti [R2 Development Setup](./R2-DEVELOPMENT.md); unit
-test tetap memakai mock dan tidak mengakses bucket sungguhan.
+R2 khusus development. Ikuti kontrak konfigurasi di
+[BE-09 R2 storage](./tasks/S1-BE-09-r2-storage.md); unit test tetap memakai mock
+dan tidak mengakses bucket sungguhan.
 
 ### 6. Siapkan Prisma dan database
 
@@ -369,7 +371,7 @@ branch `dev` atau interface-nya sudah dibekukan oleh Backend Lead.
 ```mermaid
 flowchart TD
     be01["BE-01 Prisma"] --> be02["BE-02 Validation and errors"]
-    be02 --> be03["BE-03 Participant and RSVP"]
+    be02 --> be03["BE-03 Participant and Attendance"]
     be03 --> be04["BE-04 Verification"]
     be04 --> be05["BE-05 Email"]
     be03 --> be06["BE-06 Session"]
@@ -390,7 +392,7 @@ flowchart TD
 |---|---|---|
 | [BE-01](./tasks/S1-BE-01-database-schema.md) | Prisma schema, config, dan initial migration | Data model dan environment contract |
 | [BE-02](./tasks/S1-BE-02-api-core-validation.md) | Zod schema, error contract, response helper | Validation dan HTTP response contract |
-| [BE-03](./tasks/S1-BE-03-participant-rsvp.md) | Participant, RSVP, workshop enrollment | Identity dan RSVP rules |
+| [BE-03](./tasks/S1-BE-03-participant-attendance.md) | Participant, Attendance, workshop enrollment | Identity dan Attendance rules |
 | [BE-04](./tasks/S1-BE-04-verification-link.md) | Magic link dan resend | Token lifecycle dan purpose isolation |
 | [BE-05](./tasks/S1-BE-05-email-notification.md) | Resend adapter dan notification service | Email provider policy |
 | [BE-06](./tasks/S1-BE-06-session-identity.md) | Signed session dan identity resolver | Session contract |
@@ -414,12 +416,12 @@ satu PR, dan satu acceptance gate. Kedua PIC menyetujui final PR bersama.
 | BE-01 baseline | Backend Lead | Prisma schema, migration, empty-database verification | Verifikasi dan freeze 9 Agustus 2026 |
 | BE-02 baseline | Backend Lead | Zod schemas, `ApplicationError`, shared API helpers | Smoke test dan export-path freeze 9 Agustus 2026 |
 | BE-03A — Participant & workshop entry | Ferdinand Valentino Darmawan | `participant.service.ts`, workshop enroll route, `findOrCreateParticipant`, `enrollWorkshop` | Implementasi/review 9 Agustus; support integrasi 10 Agustus 2026 |
-| BE-03B — RSVP entry & confirmation | Muhammad Orkhan | `rsvp.service.ts`, RSVP route, pending/verified/confirmation behavior | Implementasi/review 9 Agustus; support integrasi 10 Agustus 2026 |
+| BE-03B — Attendance entry & confirmation | Muhammad Orkhan | `attendance.service.ts`, Attendance route, pending/verified/confirmation behavior | Implementasi/review 9 Agustus; support integrasi 10 Agustus 2026 |
 | BE-04A — Verification service | Muhammad Marvel Sidharta | Token generation/hash/expiry, purpose transaction, resend cooldown | Mulai setelah BE-03 freeze 9 Agustus; merge 10 Agustus 2026 |
 | BE-04B — Verification routes | Jeremy Gerald Sutanto | Verify/resend Route Handlers, HTTP mapping, BE-05/BE-06 seams | Mulai setelah service interface tersedia; merge 10 Agustus 2026 |
 | BE-05 — Email notification | Denzel Santoso | Resend adapter, notification service, email tests | Mocked implementation 9 Agustus; integration/merge 10 Agustus 2026 |
 | BE-06A — Signed session | Bima Aditama Wibowo Putro | `lib/session.ts`, HMAC token, cookie helpers | Helper/test 9 Agustus; integration/merge 10 Agustus 2026 |
-| BE-06B — Identity & routes | Rafi Pradipta Andira Sulistyo | `lib/auth.ts`, identity resolver, verify success branch, RSVP confirm route | Helper/test 9 Agustus; integration/merge 10 Agustus 2026 |
+| BE-06B — Identity & routes | Rafi Pradipta Andira Sulistyo | `lib/auth.ts`, identity resolver, verify success branch, Attendance confirm route | Helper/test 9 Agustus; integration/merge 10 Agustus 2026 |
 | BE-07 — Workshop activation | Kairenzo Vemil | Workshop service, activation route, eligibility | Implementasi/review/merge 10 Agustus 2026 |
 | BE-08 — Workshop invitation | Christian Immanuel | Authorized invitation redirect and tests | Implementasi/integration/merge 10 Agustus 2026 |
 | BE-09 — R2 storage | Bayu Palamarta Wirawan | PDF validation, upload/delete abstraction, mocked R2 tests | Implementasi/review/merge 9 Agustus; support BE-10 10 Agustus 2026 |
@@ -436,7 +438,7 @@ tidak mengubah dependency atau merge gate setiap task.
 
 | Hari | Target pengerjaan dan hasil akhir |
 |---|---|
-| **9 Agustus 2026** | Verifikasi baseline BE-01/BE-02; BE-03A menyelesaikan participant/workshop entry dan membekukan interface; BE-03B menyelesaikan RSVP flow; BE-03 menjalani shared review; BE-04A/BE-04B mulai setelah interface tersedia; BE-05, BE-06A, dan BE-06B mengerjakan bagian independen; BE-09 selesai dengan mocked storage tests. |
+| **9 Agustus 2026** | Verifikasi baseline BE-01/BE-02; BE-03A menyelesaikan participant/workshop entry dan membekukan interface; BE-03B menyelesaikan Attendance flow; BE-03 menjalani shared review; BE-04A/BE-04B mulai setelah interface tersedia; BE-05, BE-06A, dan BE-06B mengerjakan bagian independen; BE-09 selesai dengan mocked storage tests. |
 | **10 Agustus 2026** | BE-04A/BE-04B, BE-05, dan BE-06A/BE-06B menyelesaikan integration gate; BE-07 selesai; BE-08 dan BE-10 selesai setelah dependency tersedia; seluruh endpoint menjalani integration test; backend diserahkan untuk integrasi frontend. |
 | **11 Agustus 2026** | Buffer bug fixing hasil integrasi frontend, regression test, security check, dokumentasi final, dan hard freeze backend. Tidak menerima fitur atau perubahan requirement baru. |
 
@@ -462,7 +464,7 @@ dan force push/delete branch dilarang.
 Gunakan lowercase dan tanda hubung:
 
 ```text
-feat/s1-be-03-participant-rsvp
+feat/s1-be-03-participant-attendance
 feat/s1-be-04-verification
 feat/s1-be-09-r2-storage
 fix/s1-be-06-expired-session
@@ -491,8 +493,8 @@ Contoh memulai task:
 ```bash
 git checkout dev
 git pull --ff-only origin dev
-git switch -c feat/s1-be-03-participant-rsvp
-git push -u origin feat/s1-be-03-participant-rsvp
+git switch -c feat/s1-be-03-participant-attendance
+git push -u origin feat/s1-be-03-participant-attendance
 ```
 
 Sebelum final review, sinkronkan tanpa menulis ulang history branch bersama:
@@ -529,7 +531,7 @@ Gunakan scope task atau area yang jelas: `be-03`, `be-04`, `be-06`, `r2`,
 Contoh commit:
 
 ```text
-feat(be-03): add pending RSVP creation
+feat(be-03): add pending Attendance creation
 test(be-09): reject invalid PDF magic bytes
 fix(be-06): reject expired participant session
 docs(backend): add local R2 setup
@@ -553,7 +555,7 @@ Aturan commit:
 ## Aturan yang tidak boleh dilanggar
 
 - Jangan menambah password login, OTP, refresh token, JWT dependency, atau tabel `Session`.
-- Jangan membuat RSVP saat peserta hanya melakukan workshop enrollment.
+- Jangan membuat Attendance saat peserta hanya melakukan workshop enrollment.
 - Jangan meminta nama/email lagi saat workshop activation atau submission.
 - Peserta hanya boleh memiliki satu path workshop (`CTF`, `BCC`, atau `CP`);
   nomor HP wajib dan NIM opsional disimpan pada `WorkshopRegistration`.
