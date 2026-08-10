@@ -23,7 +23,7 @@ const competitions = [
     title: "Competitive Programming",
     description:
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-    slot_remaining: 100,
+    slot_remaining: 50,
     slot_max: 100,
   },
   {
@@ -31,8 +31,8 @@ const competitions = [
     title: "Business Case Competition",
     description:
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-    slot_remaining: 100,
-    slot_max: 100,
+    slot_remaining: 0,
+    slot_max: 20,
   },
 ];
 
@@ -50,7 +50,7 @@ const careerPaths = [
     title: "Product Manager",
     description:
       "Guide the success of a product and lead the cross-functional team that is responsible for improving it. Bridge the gap between engineering, design, and business.",
-    slot_remaining: 100,
+    slot_remaining: 50,
     slot_max: 100,
   },
   {
@@ -58,8 +58,8 @@ const careerPaths = [
     title: "Software Engineer",
     description:
       "Design, develop, and test software applications. Build scalable systems and master the core fundamentals of modern programming.",
-    slot_remaining: 100,
-    slot_max: 100,
+    slot_remaining: 0,
+    slot_max: 20,
   },
 ];
 

@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
 
-const SURFACE = "bg-[#7c7a9e]"; // matching the purple palette
-const BOX = "bg-[#c9c9d2] text-[#4a4470]";
+const SURFACE = "bg-[#7c7a9e]";
+const BOX = "bg-[#d9d9d9] text-blue-600";
 const ACTION = "bg-[#ece8f3] text-[#4a4470] hover:bg-white";
 
 interface SelectionCardProps {
@@ -29,8 +29,9 @@ export function SelectionCard({
   return (
     <div
       className={cn(
-        "w-full rounded-2xl p-6 text-white shadow-sm transition-all hover:shadow-md",
+        "w-full rounded-2xl p-6 text-white shadow-sm transition-all hover:shadow-md border-1 border-transparent",
         SURFACE,
+        isSelected && "border-white",
       )}
     >
       <div className="flex items-start justify-between">
