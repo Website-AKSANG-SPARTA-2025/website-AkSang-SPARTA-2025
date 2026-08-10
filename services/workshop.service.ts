@@ -4,6 +4,10 @@ import { getPrisma } from "../lib/prisma";
 
 import { findOrCreateParticipant } from "./participant.service";
 
+function isUniqueConflict(error: unknown): error is { code: "P2002" } {
+  return typeof error === "object" && error !== null && "code" in error && error.code === "P2002";
+}
+
 export async function enrollWorkshop(input: {
   name: string;
   email: string;
@@ -34,4 +38,34 @@ export async function enrollWorkshop(input: {
     },
   });
   return { participant, registration: created, created: true };
+}
+
+export async function registerParticipant(
+  participantId: string,
+  input: { competitionPath: "CTF" | "BCC" | "CP"; phoneNumber: string; nim?: string },
+): Promise<WorkshopRegistration> {
+  try {
+    return await getPrisma().workshopRegistration.create({
+      data: {
+        participantId,
+        competitionPath: input.competitionPath,
+        phoneNumber: input.phoneNumber,
+        nim: input.nim ?? null,
+        status: "ACTIVE",
+      },
+    });
+  } catch (error) {
+    if (isUniqueConflict(error)) {
+      throw new ApplicationError("CONFLICT", 409, "Workshop participant already registered");
+    }
+    throw error;
+  }
+}
+
+export async function findActiveRegistrationByParticipantId(
+  participantId: string,
+): Promise<WorkshopRegistration | null> {
+  return getPrisma().workshopRegistration.findFirst({
+    where: { participantId, status: "ACTIVE" },
+  });
 }
