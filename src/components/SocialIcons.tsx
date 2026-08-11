@@ -5,7 +5,7 @@ import React from "react";
  *
  * lucide-react ships no brand icons (v1 removed them; its `X` export is the
  * close glyph, not the logo), so these are inlined — matching the convention
- * already used in src/app/landing/page.tsx.
+ * already used in src/app/page.tsx.
  *
  * The paths are copied verbatim from that file's About Us section so the two
  * places render identically. Note Instagram is stroke-based while TikTok and X
