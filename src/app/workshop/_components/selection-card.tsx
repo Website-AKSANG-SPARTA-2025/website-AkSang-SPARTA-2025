@@ -30,7 +30,7 @@ export function SelectionCard({
   return (
     <div
       className={cn(
-        "w-full rounded-2xl p-6 text-[#0D1027] shadow-sm transition-all hover:shadow-md border border-transparent",
+        "w-full rounded-2xl p-6 text-[#0D1027] shadow-sm transition-all hover:shadow-md border-2 border-transparent",
         SURFACE,
         isSelected && "border-[#0D1027]",
       )}

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import Navbar from "@/components/Navbar"; // unused too
+import Footer from "@/components/Footer"; // this too
 import { SelectionCard } from "./_components/selection-card";
 import { FinalisasiPilihanCard } from "./_components/finalisasi-pilihan-card"; // unused rn
 import { cn } from "@/lib/cn";
@@ -10,7 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import TextInputField from "@/components/TextInputField";
 import { Button } from "@/components/ui/button";
 
-const SURFACE = "bg-[#5d5a88]";
+const SURFACE = "bg-[#5d5a88]"; // what was this for? I forgot
 const ACTION =
   "bg-gradient-to-r from-[#2247B0] to-[#9BDBFF] hover:brightness-110";
 
@@ -96,7 +96,7 @@ export default function WorkshopPage() {
               {/* Make regis forms down here */}
 
               {/* Personal Info Section */}
-              <div className="space-y-6 mb-4 text-m">
+              <div className="space-y-6 mb-4 text-m text-white">
                 <TextInputField label="Nama Lengkap" />
                 <TextInputField label="Email Aktif" type="email" />
                 <TextInputField label="Nomor WhatsApp Aktif" type="tel" />
