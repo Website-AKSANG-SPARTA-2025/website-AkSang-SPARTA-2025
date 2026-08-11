@@ -6,7 +6,7 @@ All API calls below are same-origin calls to this application. The browser must 
 
 The local database is the authorization source of truth. Only the backend may set `Participant.emailVerifiedAt`, after Aegis reports that the email is verified. A frontend must never send a `verified` value or assume that clicking an Aegis link alone changes local authorization.
 
-`participant_session` is an HttpOnly, signed cookie that only the server can issue. Aegis verifies an email; it does **not** create an application session. The production application currently has no end-user sign-in/session-handoff route, so a fresh anonymous browser will receive `401` from session-dependent routes even after it clicks the Aegis link. Do not make protected product UI available merely because email verification completed.
+`participant_session` is an HttpOnly, signed cookie that only the server can issue. Aegis verifies an email; it does **not** create an application session. The production API now exposes `GET /api/auth/me` to read an existing session and `POST /api/auth/logout` to clear one, but it still has no endpoint that issues a session to a fresh anonymous browser. Do not make protected product UI available merely because email verification completed.
 
 `POST /api/dev/auth/session` is the narrow exception for the local API tester. It is available only when `NODE_ENV=development`, requires a locally verified participant and `DEV_AUTH_TEST_SECRET`, and returns `404` outside development. It is not a production endpoint or a normal frontend authentication contract; never place its secret in frontend code.
 
@@ -25,6 +25,7 @@ The local database is the authorization source of truth. Only the backend may se
 | 2. External verification | User opens the Aegis email link. | Aegis validates its own one-time token. No browser session is created here. |
 | 3. Local synchronization | For a public entry, call resend with the original email and purpose after the link; with an existing session, call status. | `already_verified` from resend, or `verified` from status, updates `emailVerifiedAt` and promotes pending Attendance/Workshop records in one local transaction. |
 | 4. Protected actions | Use an existing server-issued session cookie. | The backend verifies the cookie, loads the participant from PostgreSQL, then checks local `emailVerifiedAt` and workshop state. |
+| 5. Session lifecycle | On app start call `/api/auth/me`; on explicit logout call `/api/auth/logout`. | `me` returns local session identity only; `logout` expires the signed cookie. Neither endpoint creates a session. |
 
 There is no unauthenticated status-check route. A button labelled “Saya sudah verifikasi” may call resend, but it must handle both outcomes: `200` means Aegis was already verified and local state is synchronized; `202` means Aegis issued a replacement link instead. It is therefore a check/resend action, not a pure status request.
 
@@ -88,6 +89,8 @@ Application-route errors contain `success: false` and `message`. Validation erro
 | `GET /api/workshops/invitation` | None | `302` redirect to the configured community link | Verified participant session with an `ACTIVE` registration |
 | `GET /api/verifications/status` | None | `{ verified, status, ... }`; status is `verified`, `not_verified`, or `not_registered` | Participant session |
 | `POST /api/verifications/resend` | JSON: `email`, `purpose` (`ATTENDANCE` or `WORKSHOP`) | `202`: `{ status: "sent", expiresAt }`; already verified: `{ verified: true, status: "verified", verifiedAt }` | None |
+| `GET /api/auth/me` | None | `200`: local `participant` identity and verification state | Valid participant session; no Aegis request |
+| `POST /api/auth/logout` | None | `200`: empty data plus an expired `participant_session` cookie | None; idempotent |
 | `POST /api/submissions` | `multipart/form-data` with exactly one `competitionPath` and one PDF `file` | `201`: `{ id, competitionPath, fileName }` | Verified participant session with an `ACTIVE` registration |
 | `POST /api/dev/auth/session` | Development JSON: `email`, `secret` | `200`: `{ email }` plus an HttpOnly cookie | Development tester only; verified local participant and valid `DEV_AUTH_TEST_SECRET`; `404` outside development |
 
@@ -176,6 +179,21 @@ if (response.status === 429 && typeof payload.errors?.retryAfter === "number") s
 - Errors: `401` no usable participant session, `502` verification service failure.
 - UI: `linkActive: false` means the displayed verification link is inactive; offer resend rather than treating it as an active link. This call may synchronize local `PENDING` attendance/workshop state after Aegis reports verified. If the local participant is already verified, it returns local data without a needless Aegis request. A fresh anonymous browser cannot use this route until a production session flow exists.
 
+### GET /api/auth/me
+
+- Session: valid participant session required; verification is not required. Content type: none; request has no body.
+- Success: `200` `{ "success": true, "data": { "participant": { "id": "...", "name": "...", "email": "...", "verified": true, "verifiedAt": "..." } } }`. `verifiedAt` is omitted while the local participant is not verified.
+- Errors: `401` when the signed cookie is missing, expired, invalid, or points to no local participant.
+- Backend behavior: this route reads only the signed cookie and local PostgreSQL participant. It does not call Aegis, issue a cookie, or trust a client-selected email.
+- UI: call it once during application bootstrap with `credentials: "include"`. On `200`, hydrate local UI state from `data.participant`; on `401`, show the anonymous/pending-verification experience. Do not treat this as a login endpoint.
+
+### POST /api/auth/logout
+
+- Session: none required. Content type: none; request has no body.
+- Success: always `200` `{ "success": true, "message": "Logged out", "data": {} }` and an expired HttpOnly `participant_session` cookie.
+- Backend behavior: this route does not delete the participant, Attendance, WorkshopRegistration, or Submission records. It is idempotent, so it also succeeds when the browser has no session.
+- UI: call with `credentials: "include"` from an explicit logout action, then clear only in-memory/client UI state and navigate to a public page. Do not attempt to remove the HttpOnly cookie from JavaScript.
+
 ### POST /api/dev/auth/session (development tester only)
 
 - Availability: only when `NODE_ENV=development`. This is intentionally absent from the production API and normal frontend application.
@@ -230,10 +248,12 @@ await fetch("/api/submissions", { method: "POST", credentials: "include", body: 
 | New Attendance | `PENDING` → Aegis email → local sync → `VERIFIED` | Show email pending after `202`. After the external link, public UI uses resend; an existing session may use status. Either verified response synchronizes Attendance. |
 | New workshop enrollment | `PENDING` → Aegis email → local sync → `ACTIVE` | Show email pending after `202`. Do not call authenticated `register` for this same participant; local sync promotes the existing registration. |
 | Resend / check | sent / already verified / cooldown / upstream failure | `202` sent with expiry; `200` verified ends resend and syncs local state; `429` disables using `errors.retryAfter`; `502` offers a later retry. |
+| Existing session | browser cookie → `GET /api/auth/me` → local UI identity | Bootstrap the UI from the returned participant. This reads local state only and cannot sign a new browser in. |
+| Logout | `POST /api/auth/logout` → expired cookie | Clear client UI state after the `200`; local participant and registration records remain unchanged. |
 | Development test session | locally verified participant + tester secret → HttpOnly session cookie | Development tester only. It enables protected-route testing but is `404` in production and is not a product authentication flow. |
 | Verified-session actions | attendance confirmation, registration, invitation, PDF submission | Use only an existing verified session. Confirmation can promote/create Attendance; `register` creates an `ACTIVE` row only when none exists; invitation navigates by `302`; submission returns `201`. |
 
-Production session boundary: Aegis verification alone does not issue `participant_session`. A real end-user sign-in/session-handoff route is still required before a fresh production browser can enter protected flows. The development test helper is not a substitute.
+Production session boundary: Aegis verification alone does not issue `participant_session`. `GET /api/auth/me` and `POST /api/auth/logout` manage an existing session only; a real end-user sign-in/session-handoff route is still required before a fresh production browser can enter protected flows. The development test helper is not a substitute.
 
 ## Data model reference
 
@@ -241,10 +261,10 @@ Production session boundary: Aegis verification alone does not issue `participan
 
 | Model | Field | Type / notes | Frontend visibility |
 | --- | --- | --- | --- |
-| Participant | `id` | CUID primary key | Server-private |
-|  | `name` | String | Submitted for public entry; not returned by current routes |
-|  | `email` | Unique string | Submitted for public entry; server-owned identity thereafter |
-|  | `emailVerifiedAt` | Nullable timestamp | Server-private verification state |
+| Participant | `id` | CUID primary key | Returned only to the current session holder by `GET /api/auth/me` |
+|  | `name` | String | Submitted for public entry; returned only to the current session holder by `GET /api/auth/me` |
+|  | `email` | Unique string | Submitted for public entry; returned only to the current session holder by `GET /api/auth/me` |
+|  | `emailVerifiedAt` | Nullable timestamp | Exposed to the current session holder only as derived `verified` and optional `verifiedAt` from `GET /api/auth/me` |
 |  | `createdAt`, `updatedAt` | Timestamps | Server-private |
 | Attendance | `id` | CUID primary key | Returned only as `attendanceId` |
 |  | `participantId` | Unique Participant foreign key | Server-private |
@@ -290,7 +310,8 @@ Use this exact local test sequence:
 2. Open the Aegis email link and complete its external verification.
 3. Call `POST /api/verifications/resend` with the same email and purpose. A `200` verified response means the backend synchronized the local participant and pending records; a `202` means use the new link instead.
 4. In the tester's development-session form, enter that verified email and the manually supplied development secret. The `200` response sets the HttpOnly cookie.
-5. Test `confirm`, `status`, `register` when applicable, invitation, and submission from the same hostname.
+5. Call `GET /api/auth/me` to confirm the browser session, then test `confirm`, `status`, `register` when applicable, invitation, and submission from the same hostname.
+6. Call `POST /api/auth/logout` to clear the test session; a later `GET /api/auth/me` should return `401`.
 
 The tester does not bypass verification. `POST /api/dev/auth/session` returns
 `404` in production and must never be called by a deployed user-facing frontend.
@@ -303,8 +324,10 @@ The tester does not bypass verification. `POST /api/dev/auth/session` returns
 - Render the shared success/error envelope and status-specific UI treatment.
 - Never create, read, or synthesize `participant_session` in browser JavaScript.
 - Never call Aegis from the browser or expose its API key.
+- On application startup, use `GET /api/auth/me` with `credentials: "include"` to hydrate an existing session; `401` means anonymous, not an API failure to retry.
+- Use `POST /api/auth/logout` for logout and reset client UI state only after its `200`; the server expires the HttpOnly cookie.
 - Use resend as the public check/resend action after the Aegis link; do not invent an unauthenticated status API.
-- Keep protected product routes disabled for a fresh browser after email verification until the backend adds a real production sign-in/session handoff.
+- Keep protected product routes disabled for a fresh browser after email verification. `/api/auth/me` and `/api/auth/logout` do not create a production session; a real sign-in/session handoff is still required.
 - Do not integrate `POST /api/dev/auth/session` into product code. It is only a manual local-tester helper and depends on a server-only secret.
 
 ### Frontend integration tests
@@ -317,6 +340,8 @@ The tester does not bypass verification. `POST /api/dev/auth/session` returns
 | Verified resend sync | A `200` resend response with `data.verified: true` stops resend and refreshes the local verified state; a `202` keeps the pending screen. |
 | Resend cooldown | A `429` resend response disables resend and counts down from `errors.retryAfter` when present. |
 | Inactive link | Status `not_verified` with `linkActive: false` shows an inactive-link state and resend option. |
+| Session bootstrap | `GET /api/auth/me` with a valid cookie hydrates the returned local participant; no Aegis request occurs. A `401` renders anonymous UI. |
+| Logout | `POST /api/auth/logout` returns `200`, client state clears, and the next `/api/auth/me` request receives `401`. |
 | Session-bound status | Status sends no arbitrary email query and uses only the server session. |
 | Protected routes | `401` shows the session blocker; `403` explains missing active workshop registration. |
 | Development tester | A locally verified test participant plus the correct manually entered secret sets a cookie only in development; the route is never used by product UI. |
