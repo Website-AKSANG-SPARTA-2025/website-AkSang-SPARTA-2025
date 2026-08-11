@@ -2,6 +2,7 @@ import React from "react";
 import Image from "next/image";
 import EventCard from "./_components/EventCard";
 import CountdownTimer from "@/components/countdown-timer";
+import Link from "next/link";
 
 export default function LandingPage() {
   const targetDate = new Date(2026, 7, 12, 8, 30, 0);
@@ -104,7 +105,11 @@ export default function LandingPage() {
             </p>
 
             <div className="flex flex-col sm:flex-row items-center gap-[16px] w-full sm:w-auto">
-              <button className="flex items-center justify-center gap-[10px] w-[192.5px] h-[66px] rounded-[35.2px] bg-gradient-to-b from-[#9BDAFF] to-[#FFFFFF] text-[#0D1027] transition-all hover:scale-105 shadow-lg px-6">
+              {/* Tombol Daftar Sekarang */}
+              <Link
+                href="/presensi"
+                className="flex items-center justify-center gap-[10px] w-[192.5px] h-[66px] rounded-[35.2px] bg-gradient-to-b from-[#9BDAFF] to-[#FFFFFF] text-[#0D1027] transition-all hover:scale-105 shadow-lg px-6"
+              >
                 <span
                   className="flex-1 text-center font-bold text-[16px] leading-[18px] tracking-[0.06em] uppercase"
                   style={{ fontFamily: "var(--font-science-gothic)" }}
@@ -123,8 +128,13 @@ export default function LandingPage() {
                 >
                   <path d="M5 12h14M12 5l7 7-7 7" />
                 </svg>
-              </button>
-              <button className="flex items-center justify-center gap-[10px] w-[192.5px] h-[66px] rounded-[35.2px] bg-gradient-to-b from-[#9BDAFF] to-[#FFFFFF] text-[#0D1027] transition-all hover:scale-105 shadow-lg px-6">
+              </Link>
+
+              {/* Tombol Tentang Kami */}
+              <Link
+                href="#tentang-kami"
+                className="flex items-center justify-center gap-[10px] w-[192.5px] h-[66px] rounded-[35.2px] bg-gradient-to-b from-[#9BDAFF] to-[#FFFFFF] text-[#0D1027] transition-all hover:scale-105 shadow-lg px-6"
+              >
                 <span
                   className="flex-1 text-center font-bold text-[16px] leading-[18px] tracking-[0.06em] uppercase"
                   style={{ fontFamily: "var(--font-science-gothic)" }}
@@ -143,7 +153,7 @@ export default function LandingPage() {
                 >
                   <path d="M6 9l6 6 6-6" />
                 </svg>
-              </button>
+              </Link>
             </div>
           </div>
         </section>
@@ -163,26 +173,32 @@ export default function LandingPage() {
           >
             RANGKAIAN ACARA
           </h2>
+          {/* Di dalam src/app/page.tsx */}
           <div className="flex flex-col lg:flex-row gap-16 lg:gap-24 w-full justify-center items-center max-w-[1200px] mx-auto px-4">
             <EventCard
               title="Workshop"
               description="Kembangkan potensimu menjadi kemampuan teknis yang nyata melalui praktik dan pemecahan masalah."
               buttonText="Daftar Workshop"
               iconSrc="/logo_workshop.png"
+              href="/workshop" // <--- PASTIKAN BARIS INI DITAMBAHKAN
             />
-            {/* Ubah title dan buttonText sesuai screenshot Figma terbaru */}
+
             <EventCard
               title="Form Presensi"
               description="Catat kehadiranmu di sini untuk memvalidasi partisipasiMU dalam rangkaian acara!"
               buttonText="Presensi"
               iconSrc="/logo_presensi.png"
+              href="/presensi" // <--- PASTIKAN BARIS INI DITAMBAHKAN
             />
           </div>
         </section>
 
         {/* 4. ABOUT US SECTION - AEGIS THEME */}
         {/* No bottom padding: the footer's own top fade supplies that gap. */}
-        <section className="mt-24 md:mt-32 flex flex-col items-center w-full relative z-10">
+        <section
+          id="tentang-kami"
+          className="mt-24 md:mt-32 flex flex-col items-center w-full relative z-10"
+        >
           {/*
             Side robot peeking in from the right, straddling the gap between the
             Events buttons and this heading. Deliberately overflows the right

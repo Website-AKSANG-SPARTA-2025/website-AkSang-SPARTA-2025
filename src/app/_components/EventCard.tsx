@@ -1,12 +1,13 @@
 import React from "react";
 import Image from "next/image";
+import Link from "next/link"; // Wajib di-import agar bisa pindah halaman
 
 interface EventCardProps {
   title: string;
   description: string;
   buttonText: string;
-  /** Card mascot, e.g. /logo_workshop.png */
   iconSrc: string;
+  href: string; // Wajib ditambahkan di sini
 }
 
 export default function EventCard({
@@ -14,6 +15,7 @@ export default function EventCard({
   description,
   buttonText,
   iconSrc,
+  href,
 }: EventCardProps) {
   return (
     <div className="flex flex-col items-center w-full max-w-[472px] drop-shadow-2xl">
@@ -35,7 +37,6 @@ export default function EventCard({
           />
         </div>
 
-        {/* Class uppercase dan tracking-wider dihapus agar teks kembali ke format awal (Title Case) dan ukurannya pas */}
         <h3
           className="font-bold text-[#F9F9FF] text-[28px] md:text-[36px] leading-[46px] mb-4 mt-2 drop-shadow-md capitalize"
           style={{ fontFamily: "var(--font-science-gothic)" }}
@@ -51,7 +52,11 @@ export default function EventCard({
         </p>
       </div>
 
-      <button className="mt-8 px-[36px] py-[24px] h-[70px] bg-gradient-to-b from-[#9BDBFF] to-[#FFFFFF] hover:scale-105 rounded-[40px] flex items-center justify-center gap-[8px] transition-all shadow-[0_4px_20px_rgba(155,218,255,0.4)] relative z-10">
+      {/* Ini adalah bagian yang membuat tombol bisa di-klik pindah halaman */}
+      <Link
+        href={href || "#"}
+        className="mt-8 px-[36px] py-[24px] h-[70px] bg-gradient-to-b from-[#9BDBFF] to-[#FFFFFF] hover:scale-105 rounded-[40px] flex items-center justify-center gap-[8px] transition-all shadow-[0_4px_20px_rgba(155,218,255,0.4)] relative z-10"
+      >
         <span
           className="text-[#0D1027] font-bold text-[16px] leading-[22px]"
           style={{ fontFamily: "var(--font-science-gothic)" }}
@@ -70,7 +75,7 @@ export default function EventCard({
         >
           <path d="M5 12h14M12 5l7 7-7 7" />
         </svg>
-      </button>
+      </Link>
     </div>
   );
 }
