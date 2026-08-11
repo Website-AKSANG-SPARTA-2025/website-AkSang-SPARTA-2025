@@ -4,13 +4,16 @@ interface TextInputFieldProps extends React.InputHTMLAttributes<HTMLInputElement
   label: string;
 }
 
-export default function TextInputField({ label, ...props }: TextInputFieldProps) {
+export default function TextInputField({
+  label,
+  ...props
+}: TextInputFieldProps) {
   return (
     <div className="w-full">
       <label className="block text-navy font-bold font-jetbrains mb-2">
         {label}
       </label>
-      <input 
+      <input
         className="w-full bg-gray-100 border-none rounded-xl px-4 py-3 font-jetbrains focus:ring-2 focus:ring-primary outline-none transition-all"
         {...props}
       />

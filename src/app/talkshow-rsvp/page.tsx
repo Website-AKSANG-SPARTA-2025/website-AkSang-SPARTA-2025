@@ -1,14 +1,10 @@
 import React from "react";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import TextInputField from "@/components/TextInputField";
 import { Button } from "@/components/ui/button";
 
 export default function TalkshowRSVPPage() {
   return (
     <div className="min-h-screen flex flex-col bg-[#F3F4F9]">
-      <Navbar />
-
       <main className="flex-1 w-full max-w-5xl mx-auto px-6 py-8 flex flex-col gap-8">
         {/* Banner Section */}
         <div className="w-full h-48 md:h-64 bg-gradient-to-br from-gray-400 to-gray-200 rounded-3xl shadow-sm">
@@ -106,8 +102,6 @@ export default function TalkshowRSVPPage() {
           </div>
         </form>
       </main>
-
-      <Footer />
     </div>
   );
 }
