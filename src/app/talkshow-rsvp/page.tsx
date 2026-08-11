@@ -1,104 +1,114 @@
 import React from "react";
+import Image from "next/image";
 import TextInputField from "@/components/TextInputField";
 import { Button } from "@/components/ui/button";
 
 export default function TalkshowRSVPPage() {
   return (
-    <div className="min-h-screen flex flex-col bg-[#F3F4F9]">
-      <main className="flex-1 w-full max-w-5xl mx-auto px-6 py-8 flex flex-col gap-8">
-        {/* Banner Section */}
-        <div className="w-full h-48 md:h-64 bg-gradient-to-br from-gray-400 to-gray-200 rounded-3xl shadow-sm">
-          {/* Placeholder for actual image banner */}
+    <div className="relative isolate min-h-screen flex flex-col pt-32 pb-16 overflow-x-hidden">
+      {/* Base Space Background */}
+      <div className="fixed inset-0 -z-20 bg-[#0D1027]">
+        <div className="absolute inset-0 bg-[url('/starry_bg.jpg')] bg-cover bg-center opacity-80"></div>
+      </div>
+
+      {/* Planet Layer (matching home page) */}
+      <div className="absolute inset-x-0 top-0 w-full flex justify-center pointer-events-none -z-10 hidden md:block overflow-hidden h-full">
+        <div className="relative w-full max-w-[1440px] h-full">
+          <img
+            src="/planet1.png"
+            alt="Planet Decoration"
+            className="absolute top-[-294px] right-[-250px] w-[696px] h-auto object-contain max-w-none opacity-90"
+          />
+        </div>
+      </div>
+
+      <main className="relative flex-1 w-full max-w-4xl mx-auto px-6 flex flex-col gap-8 z-10">
+        {/* Title Section */}
+        <div className="w-full rounded-2xl overflow-hidden shadow-xl">
+          <div className="h-8 md:h-12 w-full bg-gradient-to-r from-[#2247B0] to-[#9BDBFF]"></div>
+          <div className="bg-white p-6 md:p-10">
+            <h1 className="font-heading text-4xl md:text-5xl font-black text-[#0D1027] mb-4 uppercase tracking-[-0.05em]">
+              FORM PRESENSI
+            </h1>
+            <p className="font-jetbrains text-sm md:text-base text-gray-700 leading-relaxed font-medium tracking-[-0.1em]">
+              AI for Impact is an initiative that brings together students,
+              researchers, and professionals to explore how artificial
+              intelligence can solve environmental, social, and humanitarian
+              challenges.
+            </p>
+          </div>
         </div>
 
-        {/* Separator Gradient */}
-        <div className="w-full h-6 rounded-full bg-gradient-to-r from-purple-500 to-gray-300"></div>
+        {/* Form Container */}
+        <form className="w-full flex flex-col gap-6 md:gap-8">
+          {/* Nama Lengkap */}
+          <div className="w-full rounded-2xl overflow-hidden shadow-lg">
+            <div className="h-8 md:h-10 w-full bg-gradient-to-r from-[#2247B0] to-[#9BDBFF]"></div>
+            <div className="bg-white p-6 md:p-8">
+              <TextInputField label="Nama Lengkap" placeholder="" required />
+            </div>
+          </div>
 
-        {/* Header Section */}
-        <div>
-          <h1 className="text-3xl md:text-4xl font-bold text-navy mb-4 font-science">
-            Pendaftaran Talkshow
-          </h1>
-          <p className="text-base text-navy/70 leading-relaxed font-jetbrains">
-            AI for Impact is an initiative that brings together students,
-            researchers, and professionals to explore how artificial
-            intelligence can solve environmental, social, and humanitarian
-            challenges.
-          </p>
-        </div>
+          {/* Row: WA & Institusi */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+            <div className="w-full rounded-2xl overflow-hidden shadow-lg">
+              <div className="h-8 md:h-10 w-full bg-gradient-to-r from-[#2247B0] to-[#9BDBFF]"></div>
+              <div className="bg-white p-6 md:p-8">
+                <TextInputField
+                  label="Nomor WhatsApp aktif"
+                  type="tel"
+                  placeholder=""
+                  required
+                />
+              </div>
+            </div>
 
-        {/* Form Section */}
-        <form className="w-full flex flex-col gap-6">
-          {/* Card 1: Nama */}
-          <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-            <div className="h-3 w-full bg-gradient-to-r from-[#9F55FF] to-[#D5B3FF]"></div>
-            <div className="p-6 md:p-8">
+            <div className="w-full rounded-2xl overflow-hidden shadow-lg">
+              <div className="h-8 md:h-10 w-full bg-gradient-to-r from-[#2247B0] to-[#9BDBFF]"></div>
+              <div className="bg-white p-6 md:p-8">
+                <TextInputField
+                  label="Asal Institusi"
+                  placeholder=""
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Status */}
+          <div className="w-full rounded-2xl overflow-hidden shadow-lg">
+            <div className="h-8 md:h-10 w-full bg-gradient-to-r from-[#2247B0] to-[#9BDBFF]"></div>
+            <div className="bg-white p-6 md:p-8">
               <TextInputField
-                label="Nama Lengkap"
-                placeholder="Masukkan nama lengkap Anda"
+                label="Status"
+                placeholder="Misal : Mahasiswa"
                 required
               />
             </div>
           </div>
 
-          {/* Card 2 & 3: Email and Phone (Side by side) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm">
-              <TextInputField
-                label="Email"
-                type="email"
-                placeholder="Masukkan email Anda"
-                required
-              />
-            </div>
-            <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm">
-              <TextInputField
-                label="Nomor Telepon"
-                type="tel"
-                placeholder="Masukkan nomor telepon aktif"
-                required
-              />
-            </div>
-          </div>
-
-          {/* Card 4: Remaining Fields and Submit */}
-          <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm flex flex-col gap-6">
-            <TextInputField
-              label="Asal Instansi / Universitas"
-              placeholder="Masukkan institusi Anda"
-              required
-            />
-            <TextInputField
-              label="Jurusan / Bidang Studi"
-              placeholder="Masukkan jurusan Anda"
-            />
-            <TextInputField
-              label="Alasan Mengikuti Talkshow"
-              placeholder="Tuliskan alasan Anda secara singkat"
-            />
-
-            <div className="flex justify-end mt-4">
-              <Button
-                type="submit"
-                className="bg-[#59557F] hover:bg-[#474366] text-white rounded-xl px-8 py-6 font-jetbrains font-bold flex items-center gap-2 transition-all shadow-md"
+          {/* Submit Button */}
+          <div className="flex justify-end mt-4">
+            <Button
+              type="submit"
+              className="bg-gradient-to-r from-[#2247B0] to-[#9BDBFF] hover:opacity-90 text-[#0D1027] rounded-full px-8 py-6 font-jetbrains font-bold tracking-[-0.1em] flex items-center gap-2 transition-all shadow-xl text-base w-full md:w-auto justify-center"
+            >
+              Tandai Hadir
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               >
-                Tombol daftar
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M5 12h14" />
-                  <path d="m12 5 7 7-7 7" />
-                </svg>
-              </Button>
-            </div>
+                <path d="M5 12h14" />
+                <path d="m12 5 7 7-7 7" />
+              </svg>
+            </Button>
           </div>
         </form>
       </main>
