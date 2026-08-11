@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 
 export default function Navbar() {
@@ -10,12 +11,16 @@ export default function Navbar() {
     <nav className="w-full bg-[#0D1027] border-b border-white/10 sticky top-0 z-50 px-6 py-4 text-white font-jetbrains">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Logo */}
-        <div className="flex items-center gap-2 w-24">
-          <div className="w-12 h-12 rounded-full bg-white flex flex-col items-center justify-center text-[8px] font-bold text-gray-500 leading-tight">
-            <span>Logo</span>
-            <span>Kegiatan</span>
-          </div>
-        </div>
+        <Link href="/" className="flex shrink-0 items-center">
+          <Image
+            src="/logo_kegiatan.png"
+            alt="Aegis — beranda"
+            width={206}
+            height={68}
+            priority
+            className="h-auto w-[110px] object-contain md:w-[130px]"
+          />
+        </Link>
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-10 text-sm font-bold tracking-wide">

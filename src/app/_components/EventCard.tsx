@@ -1,15 +1,19 @@
 import React from "react";
+import Image from "next/image";
 
 interface EventCardProps {
   title: string;
   description: string;
   buttonText: string;
+  /** Card mascot, e.g. /logo_workshop.png */
+  iconSrc: string;
 }
 
 export default function EventCard({
   title,
   description,
   buttonText,
+  iconSrc,
 }: EventCardProps) {
   return (
     <div className="flex flex-col items-center w-full max-w-[472px] drop-shadow-2xl">
@@ -20,8 +24,15 @@ export default function EventCard({
             "polygon(0 0, 100% 0, 100% 30%, 96% 35%, 96% 65%, 100% 70%, 100% 100%, 0 100%, 0 70%, 4% 65%, 4% 35%, 0 30%)",
         }}
       >
-        <div className="relative w-[140px] h-[140px] flex justify-center items-center mb-6 bg-white/20 rounded-2xl border-2 border-dashed border-white/40 text-white/90 text-sm font-bold shadow-inner">
-          Robot Img
+        <div className="relative w-[140px] h-[140px] flex justify-center items-center mb-6">
+          <Image
+            src={iconSrc}
+            alt=""
+            aria-hidden="true"
+            width={391}
+            height={367}
+            className="w-full h-auto object-contain drop-shadow-lg"
+          />
         </div>
 
         {/* Class uppercase dan tracking-wider dihapus agar teks kembali ke format awal (Title Case) dan ukurannya pas */}

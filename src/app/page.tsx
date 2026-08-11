@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import EventCard from "./_components/EventCard";
 import CountdownTimer from "@/components/countdown-timer";
 
@@ -11,6 +12,14 @@ export default function LandingPage() {
 
   return (
     <main className="relative min-h-screen bg-[#0D1027] overflow-hidden text-white font-sans">
+      {/*
+        Viewport-wide base colour, same pattern as /presensi. <main>'s own
+        bg stops where <main> does, but the footer's background image fades to
+        transparent at its top edge — without this it would composite over the
+        white <body> and show a bright band above the footer.
+      */}
+      <div className="fixed inset-0 -z-20 bg-[#0D1027]" />
+
       {/* ========================================================= */}
       {/* LAYER 0: BACKGROUND UTAMA (PALING BELAKANG) */}
       {/* ========================================================= */}
@@ -67,9 +76,14 @@ export default function LandingPage() {
         {/* 2. HERO SECTION - AEGIS THEME */}
         <section className="mt-8 md:mt-16 flex flex-col md:flex-row items-center justify-center gap-10 md:gap-16 relative z-10 max-w-[1100px] mx-auto px-4 md:px-8">
           <div className="w-[180px] md:w-[250px] shrink-0 flex justify-center">
-            <div className="w-full aspect-[3/4] bg-white/10 rounded-[32px] flex items-center justify-center text-white/50 border-2 border-dashed border-white/20">
-              Robot Image
-            </div>
+            <Image
+              src="/robot.png"
+              alt="Maskot robot Aegis"
+              width={506}
+              height={813}
+              priority
+              className="w-full h-auto object-contain drop-shadow-2xl"
+            />
           </div>
 
           <div className="flex flex-col items-center md:items-start text-center md:text-left w-full max-w-[679px]">
@@ -154,18 +168,35 @@ export default function LandingPage() {
               title="Workshop"
               description="Kembangkan potensimu menjadi kemampuan teknis yang nyata melalui praktik dan pemecahan masalah."
               buttonText="Daftar Workshop"
+              iconSrc="/logo_workshop.png"
             />
             {/* Ubah title dan buttonText sesuai screenshot Figma terbaru */}
             <EventCard
               title="Form Presensi"
               description="Catat kehadiranmu di sini untuk memvalidasi partisipasiMU dalam rangkaian acara!"
               buttonText="Presensi"
+              iconSrc="/logo_presensi.png"
             />
           </div>
         </section>
 
         {/* 4. ABOUT US SECTION - AEGIS THEME */}
-        <section className="mt-24 md:mt-32 flex flex-col items-center w-full relative z-10 pb-16 md:pb-24">
+        {/* No bottom padding: the footer's own top fade supplies that gap. */}
+        <section className="mt-24 md:mt-32 flex flex-col items-center w-full relative z-10">
+          {/*
+            Side robot peeking in from the right, straddling the gap between the
+            Events buttons and this heading. Deliberately overflows the right
+            edge — <main> is overflow-hidden, which produces the cropped look.
+            Shown at both breakpoints, unlike the planet/galaxy decorations.
+          */}
+          <Image
+            src="/robot_samping.png"
+            alt=""
+            aria-hidden="true"
+            width={542}
+            height={1006}
+            className="pointer-events-none absolute right-0 -top-20 z-20 h-auto w-[130px] translate-x-[30%] md:-top-40 md:w-[260px]"
+          />
           {/* Hapus class uppercase agar kembali jadi Title Case (About Us) */}
           <h2
             className="text-[#FFFFFF] font-bold text-[40px] md:text-[50px] leading-tight md:leading-[30px] tracking-wide mb-10 md:mb-12 capitalize drop-shadow-lg"
