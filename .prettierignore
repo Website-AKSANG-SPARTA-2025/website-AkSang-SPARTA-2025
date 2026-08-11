@@ -8,3 +8,7 @@ package-lock.json
 # Prose and generated config we don't want reformatted
 *.md
 next.config.ts
+
+# Prisma client output — rewritten by `prisma generate`, so formatting it
+# would be reverted on every regeneration.
+src/generated/

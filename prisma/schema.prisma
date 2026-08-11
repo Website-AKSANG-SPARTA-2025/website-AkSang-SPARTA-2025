@@ -1,0 +1,88 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum AttendanceStatus {
+  PENDING
+  VERIFIED
+}
+
+enum AttendeeType {
+  STUDENT
+  PUBLIC
+}
+
+enum CompetitionPath {
+  CTF
+  BCC
+  CP
+}
+
+enum WorkshopRegistrationStatus {
+  PENDING
+  ACTIVE
+}
+
+model Participant {
+  id              String    @id @default(cuid())
+  name            String
+  email           String    @unique
+  emailVerifiedAt DateTime?
+
+  attendance           Attendance?
+  workshopRegistration WorkshopRegistration?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Attendance {
+  id            String           @id @default(cuid())
+  participantId String           @unique
+  status        AttendanceStatus @default(PENDING)
+  attendeeType  AttendeeType
+  institution   String?
+
+  participant Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model WorkshopRegistration {
+  id              String                     @id @default(cuid())
+  participantId   String                     @unique
+  competitionPath CompetitionPath
+  phoneNumber     String
+  nim             String?
+  status          WorkshopRegistrationStatus @default(PENDING)
+
+  participant Participant  @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  submissions Submission[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([competitionPath])
+}
+
+model Submission {
+  id                     String          @id @default(cuid())
+  workshopRegistrationId String
+  competitionPath        CompetitionPath
+  fileName               String
+  storageKey             String
+  contentType            String
+  size                   Int
+
+  workshopRegistration WorkshopRegistration @relation(fields: [workshopRegistrationId], references: [id], onDelete: Cascade)
+
+  submittedAt DateTime @default(now())
+
+  @@index([workshopRegistrationId])
+}
