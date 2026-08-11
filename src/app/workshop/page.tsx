@@ -84,10 +84,9 @@ export default function WorkshopPage() {
                 Form Pendaftaran Workshop
               </h1>
               <p className="text-sm md:text-base text-white/90">
-                AI for impact is an intiative that brings together students,
-                researchers, and professionals to explore how Artificial
-                Intelligence can solve environmental, social, and humanitarian
-                challenges.
+                Silakan lengkapi formulir di bawah ini dengan data yang valid
+                untuk mencatatkan kehadiranmu dalam rangkaian kegiatan Aksi
+                Angkatan SPARTA 2025: AI for Impact.
               </p>
             </div>
 

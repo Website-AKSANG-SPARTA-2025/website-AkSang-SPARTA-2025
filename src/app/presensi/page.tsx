@@ -31,10 +31,8 @@ export default function TalkshowRSVPPage() {
               FORM PRESENSI
             </h1>
             <p className="font-jetbrains text-sm md:text-base text-gray-700 leading-relaxed font-medium tracking-[-0.1em]">
-              AI for Impact adalah inisiatif yang mempertemukan mahasiswa,
-              peneliti, dan profesional untuk mengeksplorasi bagaimana
-              kecerdasan buatan dapat memecahkan tantangan lingkungan, sosial,
-              dan kemanusiaan.
+              Catat kehadiranmu di sini untuk memvalidasi partisipasi aktifmu
+              dalam rangkaian acara AI for Impact.
             </p>
           </div>
         </div>
