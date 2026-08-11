@@ -60,15 +60,18 @@ function SocialRow({ className }: { className?: string }) {
   );
 }
 
+// mt-* on the <footer> separates it from page content. That gap used to come
+// from the background's alpha fade; now that the asset is a hard-edged opaque
+// rectangle it has to be explicit. Applies to every page.
 export default function Footer() {
   return (
-    <footer className="relative isolate w-full overflow-hidden text-white">
+    <footer className="relative isolate mt-16 w-full overflow-hidden bg-[#1a0f33] text-white md:mt-24">
       {/*
-        Decorative background (2880x515, matches this band's 5.59 aspect).
-        The top ~20% of the asset is an alpha fade to transparent so the footer
-        blends into the page above — so deliberately NO background colour and no
-        overlay here, either of which would fill that fade and square off the
-        top edge.
+        Solid background rectangle, identical at every breakpoint. The asset was
+        cropped past its alpha fade and flattened onto #0D1027, so it is fully
+        opaque — nothing behind the footer can show through, and the top edge is
+        a clean horizontal line. bg colour above is a fallback for the sliver
+        before the image loads.
       */}
       <Image
         src="/Footer_Background.png"
