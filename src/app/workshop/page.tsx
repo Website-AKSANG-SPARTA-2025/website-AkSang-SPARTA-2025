@@ -17,6 +17,7 @@ const ACTION =
 const careerPaths = [
   {
     id: "CP_Productman",
+    option: "A",
     title: "Product Manager",
     description:
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
@@ -25,6 +26,7 @@ const careerPaths = [
   },
   {
     id: "CP_Datsci",
+    option: "B",
     title: "Data Science",
     description:
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
@@ -33,6 +35,7 @@ const careerPaths = [
   },
   {
     id: "CP_Cybersec",
+    option: "C",
     title: "Cybersecurity",
     description:
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
@@ -41,6 +44,7 @@ const careerPaths = [
   },
   {
     id: "CP_Softeng",
+    option: "D",
     title: "Software Engineer",
     description:
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
@@ -112,7 +116,7 @@ export default function WorkshopPage() {
                 {careerPaths.map((career) => (
                   <SelectionCard
                     key={career.id}
-                    option={career.id.replace("CP", "")}
+                    option={career.option}
                     title={career.title}
                     description={career.description}
                     slot_remaining={career.slot_remaining}
