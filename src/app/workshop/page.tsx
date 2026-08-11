@@ -51,13 +51,12 @@ export default function WorkshopPage() {
 
   return (
     <>
-      <Navbar />
       <div className="min-h-screen flex flex-col relative font-sans text-white overflow-hidden">
         {/* Base Background Gradient */}
         <div className="absolute inset-0 bg-gradient-to-b from-[#35323c] to-[#0D1027] -z-30" />
 
         {/* Background Image Layer */}
-        <div className="absolute inset-0 bg-[url('/bg-workshop.png')] bg-[length:100%] bg-top bg-no-repeat -z-20" />
+        <div className="absolute bg-black inset-0 bg-[url('/bg-workshop.png')] bg-[length:100%] bg-top bg-no-repeat -z-20" />
 
         {/* Fading Overlay to blend the image seamlessly */}
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#35323c]/60 to-[#0D1027] -z-10" />
@@ -79,14 +78,24 @@ export default function WorkshopPage() {
 
             <div
               className={cn(
-                "rounded-3xl p-6 md:p-10 text-white shadow-xl bg-gradient-to-b from-[#2247B0] via-[#79CCFD] to-[#2247B0]",
+                "rounded-3xl p-6 md:p-8 text-white shadow-xl bg-gradient-to-b from-[#2247B0] via-[#79CCFD] to-[#2247B0]",
               )}
             >
               {/* Make regis forms down here */}
 
+              {/* Personal Info Section */}
+              <div className="space-y-6 mb-4 text-xl">
+                <TextInputField label="Nama Lengkap" />
+                <TextInputField label="Email Aktif" type="email" />
+                <TextInputField label="Nomor WhatsApp Aktif" type="tel" />
+                <TextInputField label="Asal Universitas/Sekolah" />
+                <TextInputField label="Program Studi/Jurusan" />
+                <TextInputField label="Angkatan/Tahun Masuk Universitas" />
+              </div>
+
               {/* Career Path Section */}
-              <div className="mb-4">
-                <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
+              <div className="mb-4 mt-8">
+                <h2 className="text-2xl font-bold tracking-tight">
                   Career Path
                 </h2>
               </div>
@@ -132,7 +141,7 @@ export default function WorkshopPage() {
               </div>
 
               {/* Harapan Section */}
-              <div className="mt-8">
+              <div className="mt-8 text-xl">
                 <TextInputField label="Harapan Ke Workshop" />
               </div>
             </div>
@@ -140,7 +149,7 @@ export default function WorkshopPage() {
             <div className="-mt-3 flex justify-end">
               <Button
                 className={cn(
-                  "text-[#0D1027] hover:bg-white transition-colors border-none",
+                  "text-[#0D1027] text-xl hover:bg-white transition-colors border-none",
                   ACTION,
                 )}
               >
@@ -149,7 +158,6 @@ export default function WorkshopPage() {
             </div>
           </div>
         </div>
-        <Footer />
       </div>
     </>
   );

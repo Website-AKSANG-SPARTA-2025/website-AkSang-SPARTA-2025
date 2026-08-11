@@ -3,7 +3,8 @@ import { cn } from "@/lib/cn";
 
 const SURFACE = "bg-[#ffffff]";
 const BOX = "bg-[#d9d9d9]";
-const ACTION = "bg-gradient-to-r from-[#2247B0] to-[#9BDBFF]";
+const ACTION =
+  "bg-gradient-to-r from-[#2247B0] to-[#9BDBFF] hover:brightness-110";
 
 interface SelectionCardProps {
   option?: string;
@@ -67,7 +68,7 @@ export function SelectionCard({
           onClick={onSelect}
           disabled={isFull && !isSelected}
           className={cn(
-            "rounded-full px-6 py-2.5 text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:brightness-110",
+            "rounded-full px-6 py-2.5 text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed",
             ACTION,
           )}
         >
