@@ -24,21 +24,21 @@ const competitionPaths = [
     option: "A",
     title: "Capture The Flag",
     description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+      "Uji ketajamanmu menaklukkan tantangan keamanan siber. Kuasai teknik eksploitasi, kriptografi, dan forensik digital untuk menemukan setiap flag yang tersembunyi.",
   },
   {
     id: "BCC",
     option: "B",
     title: "Business Case Competition",
     description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+      "Pecahkan permasalahan bisnis nyata dengan analisis yang tajam. Susun strategi, rancang solusi, dan presentasikan idemu secara meyakinkan di hadapan dewan juri.",
   },
   {
     id: "CP",
     option: "C",
     title: "Competitive Programming",
     description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+      "Asah logika dan kecepatan berpikirmu lewat pemrograman kompetitif. Kuasai algoritma dan struktur data untuk menyelesaikan persoalan dalam batas waktu yang ketat.",
   },
 ] satisfies ReadonlyArray<{
   id: CompetitionPath;
