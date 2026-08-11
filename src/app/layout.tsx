@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { JetBrains_Mono, Science_Gothic } from "next/font/google";
+import Footer from "@/components/Footer";
+import Navbar from "@/components/Navbar";
 import "./globals.css";
 
 // Headings. Variable font — weight is driven by font-weight utilities.
@@ -32,7 +34,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
+        {/*
+          Site-wide chrome. Pages must not render their own <Navbar />/<Footer />.
+          A page pushes the footer to the bottom by giving its root element
+          flex-1 (body is flex-col).
+        */}
+        <Navbar />
         {children}
+        <Footer />
       </body>
     </html>
   );

@@ -1,56 +1,134 @@
 import React from "react";
+import Image from "next/image";
 import Link from "next/link";
+
+import { InstagramIcon, TikTokIcon, XIcon } from "@/components/SocialIcons";
+import { cn } from "@/lib/cn";
+
+const SOCIALS = [
+  {
+    Icon: TikTokIcon,
+    handle: "steik25itb",
+    href: "https://tiktok.com/@steik25itb",
+  },
+  {
+    Icon: InstagramIcon,
+    handle: "steik25itb",
+    href: "https://instagram.com/steik25itb",
+  },
+  { Icon: XIcon, handle: "steikitb25", href: "https://x.com/steikitb25" },
+] as const;
+
+const LINKS = [
+  { label: "Home", href: "/" },
+  { label: "Workshop", href: "/workshop/pendaftaran" },
+  { label: "Events", href: "/events" },
+  { label: "Presensi", href: "/presensi" },
+  { label: "Task", href: "/tugas" },
+  { label: "Booth", href: "/booth" },
+] as const;
+
+function LogoBadge({ className }: { className?: string }) {
+  return (
+    <div
+      className={cn(
+        "flex shrink-0 flex-col items-center justify-center rounded-full bg-white text-center font-sans font-medium leading-tight text-neutral-1000",
+        className,
+      )}
+    >
+      {/* Swap these two spans for <Image src="/logo.svg" ... /> when available. */}
+      <span>Logo</span>
+      <span>Kegiatan</span>
+    </div>
+  );
+}
+
+function SocialRow({ className }: { className?: string }) {
+  return (
+    <ul className={cn("flex items-center", className)}>
+      {SOCIALS.map(({ Icon, handle, href }) => (
+        <li key={href}>
+          <a
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 text-white/90 transition-opacity hover:opacity-70"
+          >
+            <Icon className="size-[1em]" />
+            <span>{handle}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  );
+}
 
 export default function Footer() {
   return (
-    <footer className="w-full bg-[#E8E6F0] mt-20 px-6 py-12">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between gap-10">
-        {/* Left Section: Logo and Info */}
-        <div className="flex items-start gap-6">
-          <div className="w-20 h-20 shrink-0 rounded-full bg-white flex flex-col items-center justify-center text-[10px] text-gray-500 font-bold leading-tight">
-            <span>Logo</span>
-            <span>Kegiatan</span>
-          </div>
-          <div>
-            <h3 className="text-xl font-bold text-navy mb-2">
+    <footer className="relative isolate w-full overflow-hidden text-white">
+      {/*
+        Decorative background (2880x515, matches this band's 5.59 aspect).
+        The top ~20% of the asset is an alpha fade to transparent so the footer
+        blends into the page above — so deliberately NO background colour and no
+        overlay here, either of which would fill that fade and square off the
+        top edge.
+      */}
+      <Image
+        src="/Footer_Background.png"
+        alt=""
+        aria-hidden="true"
+        fill
+        sizes="100vw"
+        className="-z-10 object-cover object-center"
+      />
+
+      {/* ---------------- Mobile: centred stack, no nav links ---------------- */}
+      <div className="flex flex-col items-center gap-3 px-6 py-8 text-center md:hidden">
+        <LogoBadge className="size-12 text-[7px]" />
+
+        <h2 className="font-heading text-2xl font-bold tracking-heading">
+          AI FOR IMPACT 2026
+        </h2>
+
+        <SocialRow className="flex-wrap justify-center gap-x-4 gap-y-1 font-sans text-sm font-bold tracking-body" />
+
+        <p className="font-sans text-xs tracking-body text-white/80">
+          Bandung, West Java, Indonesia
+        </p>
+      </div>
+
+      {/* ---------------- Desktop: split row with nav grid ---------------- */}
+      <div className="mx-auto hidden max-w-7xl items-center justify-between gap-10 px-10 py-10 md:flex">
+        <div className="flex items-center gap-6">
+          <LogoBadge className="size-24 text-[11px]" />
+
+          <div className="flex flex-col gap-2">
+            <h2 className="font-heading text-3xl font-bold tracking-heading lg:text-4xl">
               AI FOR IMPACT 2026
-            </h3>
-            <p className="text-sm text-navy/70 mb-1">
+            </h2>
+
+            <p className="font-sans text-sm tracking-body text-white/85">
               Bandung, West Java, Indonesia
             </p>
-            <p className="text-xs text-navy/50">Email, Ig, X, etc</p>
+
+            <SocialRow className="gap-x-4 font-sans text-xs tracking-body" />
           </div>
         </div>
 
-        {/* Right Section: Links */}
-        <div className="grid grid-cols-2 gap-x-12 gap-y-4 text-sm font-medium text-navy/80">
-          <Link href="/" className="hover:text-primary transition-colors">
-            Home
-          </Link>
-          <Link
-            href="/workshop/pendaftaran"
-            className="hover:text-primary transition-colors"
-          >
-            Workshop
-          </Link>
-
-          <Link href="/events" className="hover:text-primary transition-colors">
-            Events
-          </Link>
-          <Link
-            href="/talkshow/rsvp"
-            className="hover:text-primary transition-colors"
-          >
-            Talkshow
-          </Link>
-
-          <Link href="/tugas" className="hover:text-primary transition-colors">
-            Task
-          </Link>
-          <Link href="/booth" className="hover:text-primary transition-colors">
-            Booth
-          </Link>
-        </div>
+        <nav aria-label="Footer">
+          <ul className="grid grid-cols-2 gap-x-14 gap-y-5 font-sans text-sm tracking-body">
+            {LINKS.map(({ label, href }) => (
+              <li key={href}>
+                <Link
+                  href={href}
+                  className="transition-opacity hover:opacity-70"
+                >
+                  {label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
       </div>
     </footer>
   );

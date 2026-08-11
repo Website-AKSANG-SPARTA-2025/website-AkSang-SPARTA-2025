@@ -56,51 +56,6 @@ export default function LandingPage() {
       {/* ========================================================= */}
       <div className="w-full px-4 md:px-[18px] relative z-10">
         {/* Konten Navbar, Hero, dkk mulai dari sini... */}
-        {/* 1. NAVBAR SECTION */}
-        <nav className="flex items-center justify-between py-6 md:py-8 max-w-[1440px] mx-auto">
-          <div className="w-10 h-10 md:w-12 md:h-12 bg-white border border-gray-200 rounded-full flex items-center justify-center text-[10px] md:text-xs text-[#0D1027] shrink-0">
-            Logo
-          </div>
-          <ul className="hidden md:flex items-center gap-8 text-sm font-medium">
-            <li className="cursor-pointer hover:text-gray-300">Home</li>
-            <li className="cursor-pointer hover:text-gray-300 flex items-center gap-1">
-              Events
-              <svg
-                width="10"
-                height="6"
-                viewBox="0 0 10 6"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M1 1L5 5L9 1"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </li>
-            <li className="cursor-pointer hover:text-gray-300">Task</li>
-          </ul>
-          <div className="md:hidden">
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <line x1="3" y1="12" x2="21" y2="12"></line>
-              <line x1="3" y1="6" x2="21" y2="6"></line>
-              <line x1="3" y1="18" x2="21" y2="18"></line>
-            </svg>
-          </div>
-          <div className="hidden md:block w-12 h-12"></div>
-        </nav>
 
         {/* 2. HERO SECTION - AEGIS THEME */}
         <section className="mt-8 md:mt-16 flex flex-col md:flex-row items-center justify-center gap-10 md:gap-16 relative z-10 max-w-[1100px] mx-auto px-4 md:px-8">
