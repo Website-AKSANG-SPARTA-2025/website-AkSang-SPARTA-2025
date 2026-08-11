@@ -76,19 +76,19 @@ export default function LandingPage() {
               className="text-white font-normal text-[14px] md:text-[18px] leading-relaxed md:leading-[30px] mb-8 md:mb-10 max-w-[574px]"
               style={{ fontFamily: "var(--font-jetbrains-mono)" }}
             >
-              AI for Impact is an initiative that brings together students,
-              researchers, and professionals to explore how artificial
-              intelligence can solve environmental, social, and humanitarian
-              challenges.
+              AI for Impact adalah inisiatif yang mempertemukan mahasiswa,
+              peneliti, dan profesional untuk mengeksplorasi bagaimana
+              kecerdasan buatan dapat memecahkan tantangan lingkungan, sosial,
+              dan kemanusiaan.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center gap-[16px] w-full sm:w-auto">
-              <button className="flex items-center justify-center gap-[7px] w-[192.5px] h-[66px] rounded-[35.2px] bg-gradient-to-b from-[#9BDAFF] to-[#FFFFFF] text-[#0D1027] transition-all hover:scale-105 shadow-lg">
+              <button className="flex items-center justify-center gap-[10px] w-[192.5px] h-[66px] rounded-[35.2px] bg-gradient-to-b from-[#9BDAFF] to-[#FFFFFF] text-[#0D1027] transition-all hover:scale-105 shadow-lg px-6">
                 <span
-                  className="font-bold text-[16px] leading-[18px] tracking-[0.1em] uppercase"
+                  className="flex-1 text-center font-bold text-[16px] leading-[18px] tracking-[0.06em] uppercase"
                   style={{ fontFamily: "var(--font-science-gothic)" }}
                 >
-                  Register Now
+                  Daftar Sekarang
                 </span>
                 <svg
                   width="18"
@@ -103,12 +103,12 @@ export default function LandingPage() {
                   <path d="M5 12h14M12 5l7 7-7 7" />
                 </svg>
               </button>
-              <button className="flex items-center justify-center gap-[7px] w-[192.5px] h-[66px] rounded-[35.2px] bg-gradient-to-b from-[#9BDAFF] to-[#FFFFFF] text-[#0D1027] transition-all hover:scale-105 shadow-lg">
+              <button className="flex items-center justify-center gap-[10px] w-[192.5px] h-[66px] rounded-[35.2px] bg-gradient-to-b from-[#9BDAFF] to-[#FFFFFF] text-[#0D1027] transition-all hover:scale-105 shadow-lg px-6">
                 <span
-                  className="font-bold text-[16px] leading-[18px] tracking-[0.1em] uppercase"
+                  className="flex-1 text-center font-bold text-[16px] leading-[18px] tracking-[0.06em] uppercase"
                   style={{ fontFamily: "var(--font-science-gothic)" }}
                 >
-                  About Us
+                  Tentang Kami
                 </span>
                 <svg
                   width="18"
@@ -132,10 +132,10 @@ export default function LandingPage() {
         {/* ========================================================= */}
         <section className="flex items-center justify-center gap-4 md:gap-[32px] w-full mt-24 relative z-10 px-4">
           {[
-            { label: "Days", value: "00" },
-            { label: "Hours", value: "00" },
-            { label: "Minutes", value: "00" },
-            { label: "Seconds", value: "00" },
+            { label: "Hari", value: "00" },
+            { label: "Jam", value: "00" },
+            { label: "Menit", value: "00" },
+            { label: "Detik", value: "00" },
           ].map((item, index) => (
             <div
               key={index}
@@ -168,18 +168,18 @@ export default function LandingPage() {
             className="text-[#FFFFFF] font-bold text-[40px] md:text-[50px] leading-tight md:leading-[30px] tracking-wide mb-10 md:mb-16 uppercase drop-shadow-lg"
             style={{ fontFamily: "var(--font-science-gothic)" }}
           >
-            Events
+            RANGKAIAN ACARA
           </h2>
           <div className="flex flex-col lg:flex-row gap-16 lg:gap-24 w-full justify-center items-center max-w-[1200px] mx-auto px-4">
             <EventCard
               title="Workshop"
-              description="Learn practical AI skills through interactive sessions guided by experienced mentors."
+              description="Kembangkan potensimu menjadi kemampuan teknis yang nyata melalui praktik dan pemecahan masalah."
               buttonText="Daftar Workshop"
             />
             {/* Ubah title dan buttonText sesuai screenshot Figma terbaru */}
             <EventCard
               title="Form Presensi"
-              description="Learn practical AI skills through interactive sessions guided by experienced mentors."
+              description="Catat kehadiranmu di sini untuk memvalidasi partisipasiMU dalam rangkaian acara!"
               buttonText="Presensi"
             />
           </div>
@@ -192,7 +192,7 @@ export default function LandingPage() {
             className="text-[#FFFFFF] font-bold text-[40px] md:text-[50px] leading-tight md:leading-[30px] tracking-wide mb-10 md:mb-12 capitalize drop-shadow-lg"
             style={{ fontFamily: "var(--font-science-gothic)" }}
           >
-            About Us
+            Tentang Kami
           </h2>
 
           <div
@@ -223,20 +223,18 @@ export default function LandingPage() {
                 className="text-[#FFFFFF] font-normal text-[12px] md:text-[18px] leading-relaxed md:leading-[30px] drop-shadow-md"
                 style={{ fontFamily: "var(--font-jetbrains-mono)" }}
               >
-                Mauris ac rutrum libero. Morbi sed arcu ut lorem ullamcorper
-                suscipit. Cras lobortis vel justo malesuada luctus. Aliquam
-                accumsan purus vitae quam fringilla congue. Mauris suscipit
-                magna quis nulla consectetur congue. Duis vulputate felis nulla,
-                vitae dignissim tortor tincidunt eget. Nullam vestibulum sed mi
-                a mollis. Curabitur in velit lobortis, iaculis mi a, hendrerit
-                ex. Interdum et malesuada fames ac ante ipsum primis in
-                faucibus.
+                Sekolah Teknik Elektro dan Informatika - Komputasi (STEI-K)
+                adalah wadah bagi para mahasiswa dan inovator masa depan dalam
+                bidang teknologi informasi. Kami berdedikasi untuk mengembangkan
+                ilmu komputasi yang tidak hanya berfokus pada keunggulan
+                akademik, tetapi juga pada penerapan teknologi yang mampu
+                memberikan solusi nyata bagi masyarakat.
               </p>
             </div>
 
-            <div className="relative z-10 flex flex-col md:flex-row justify-between items-center md:items-end w-full mt-12 md:mt-auto gap-6 md:gap-0">
+            <div className="relative z-10 flex flex-col md:flex-row justify-between items-center md:items-end w-full mt-40 md:mt-auto gap-6 md:gap-0">
               <div
-                className="text-[#FFFFFF] font-bold text-[14px] md:text-[18px] leading-tight md:leading-[24px] drop-shadow-md text-center"
+                className="text-[#FFFFFF] font-bold text-[14px] md:text-[18px] leading-tight md:leading-[24px] drop-shadow-md text-center md:translate-y-8"
                 style={{ fontFamily: "var(--font-science-gothic)" }}
               >
                 Contact Person: +62 812 3456 7890

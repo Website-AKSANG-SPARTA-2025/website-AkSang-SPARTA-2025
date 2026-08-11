@@ -31,10 +31,10 @@ export default function TalkshowRSVPPage() {
               FORM PRESENSI
             </h1>
             <p className="font-jetbrains text-sm md:text-base text-gray-700 leading-relaxed font-medium tracking-[-0.1em]">
-              AI for Impact is an initiative that brings together students,
-              researchers, and professionals to explore how artificial
-              intelligence can solve environmental, social, and humanitarian
-              challenges.
+              AI for Impact adalah inisiatif yang mempertemukan mahasiswa,
+              peneliti, dan profesional untuk mengeksplorasi bagaimana
+              kecerdasan buatan dapat memecahkan tantangan lingkungan, sosial,
+              dan kemanusiaan.
             </p>
           </div>
         </div>
@@ -55,7 +55,7 @@ export default function TalkshowRSVPPage() {
               <div className="h-8 md:h-10 w-full bg-gradient-to-r from-[#2247B0] to-[#9BDBFF]"></div>
               <div className="bg-white p-6 md:p-8">
                 <TextInputField
-                  label="Nomor WhatsApp aktif"
+                  label="Email Aktif"
                   type="tel"
                   placeholder=""
                   required
