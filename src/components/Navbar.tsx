@@ -27,7 +27,13 @@ export default function Navbar() {
           <Link href="/" className="hover:text-blue-300 transition-colors">
             Home
           </Link>
-          <div className="flex items-center gap-1 cursor-pointer hover:text-blue-300 transition-colors group relative">
+          <Link
+            href="/presensi"
+            className="hover:text-blue-300 transition-colors"
+          >
+            Presensi
+          </Link>
+          {/* <div className="flex items-center gap-1 cursor-pointer hover:text-blue-300 transition-colors group relative">
             <span>Events</span>
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -43,9 +49,12 @@ export default function Navbar() {
             >
               <path d="m6 9 6 6 6-6" />
             </svg>
-          </div>
-          <Link href="/tugas" className="hover:text-blue-300 transition-colors">
-            Task
+          </div> */}
+          <Link
+            href="/workshop"
+            className="hover:text-blue-300 transition-colors"
+          >
+            Workshop
           </Link>
         </div>
 
@@ -87,16 +96,22 @@ export default function Navbar() {
             Home
           </Link>
           <Link
+            href="/presensi"
+            className="px-4 py-3 hover:bg-white/5 rounded-lg transition-colors"
+          >
+            Presensi
+          </Link>
+          {/* <Link
             href="/events"
             className="px-4 py-3 hover:bg-white/5 rounded-lg transition-colors"
           >
             Events
-          </Link>
+          </Link> */}
           <Link
-            href="/tugas"
+            href="/workshop"
             className="px-4 py-3 hover:bg-white/5 rounded-lg transition-colors"
           >
-            Task
+            Workshop
           </Link>
         </div>
       )}

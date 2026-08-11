@@ -20,7 +20,8 @@ const careerPaths = [
     option: "A",
     title: "Product Manager",
     description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+      // "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+      "Jadilah pemimpin di balik produk digital yang sukses. Pelajari cara memadukan strategi bisnis, kebutuhan pengguna, dan teknologi untuk menciptakan solusi yang tepat sasaran.",
     slot_remaining: 100, // link this with BE stuff, idk how lmao
     slot_max: 100,
   },
@@ -29,7 +30,8 @@ const careerPaths = [
     option: "B",
     title: "Data Science",
     description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+      // "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+      "Jelajahi dunia di balik data. Temukan pola tersembunyi menggunakan statistik dan kecerdasan buatan (AI) untuk membantu pengambilan keputusan yang strategis.",
     slot_remaining: 100, // link this with BE stuff, idk how lmao
     slot_max: 100,
   },
@@ -38,7 +40,8 @@ const careerPaths = [
     option: "C",
     title: "Cybersecurity",
     description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+      // "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+      "Jadilah garda terdepan pelindung dunia digital. Kuasai teknik pertahanan sistem, analisis kerentanan, dan lindungi data pengguna dari berbagai ancaman siber.",
     slot_remaining: 50,
     slot_max: 100,
   },
@@ -47,7 +50,7 @@ const careerPaths = [
     option: "D",
     title: "Software Engineer",
     description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+      "Rancang, bangun, dan pelihara perangkat lunak berkualitas. Pelajari bagaimana mengubah barisan kode menjadi aplikasi dan sistem yang digunakan oleh jutaan orang.",
     slot_remaining: 0,
     slot_max: 20,
   },

@@ -21,11 +21,11 @@ const SOCIALS = [
 
 const LINKS = [
   { label: "Home", href: "/" },
-  { label: "Workshop", href: "/workshop/pendaftaran" },
-  { label: "Events", href: "/events" },
+  { label: "Workshop", href: "/workshop" },
+  // { label: "Events", href: "/events" },
   { label: "Presensi", href: "/presensi" },
-  { label: "Task", href: "/tugas" },
-  { label: "Booth", href: "/booth" },
+  // { label: "Workshop", href: "/workshop" },
+  // { label: "Booth", href: "/booth" },
 ] as const;
 
 function LogoBadge({ className }: { className?: string }) {
