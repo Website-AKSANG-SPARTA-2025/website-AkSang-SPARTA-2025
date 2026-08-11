@@ -22,10 +22,7 @@ const SOCIALS = [
 const LINKS = [
   { label: "Home", href: "/" },
   { label: "Workshop", href: "/workshop" },
-  // { label: "Events", href: "/events" },
   { label: "Presensi", href: "/presensi" },
-  // { label: "Workshop", href: "/workshop" },
-  // { label: "Booth", href: "/booth" },
 ] as const;
 
 function LogoBadge({ className }: { className?: string }) {
@@ -116,7 +113,7 @@ export default function Footer() {
         </div>
 
         <nav aria-label="Footer">
-          <ul className="grid grid-cols-2 gap-x-14 gap-y-5 font-sans text-sm tracking-body">
+          <ul className="grid grid-cols-1 gap-y-5 font-sans text-sm tracking-body">
             {LINKS.map(({ label, href }) => (
               <li key={href}>
                 <Link
