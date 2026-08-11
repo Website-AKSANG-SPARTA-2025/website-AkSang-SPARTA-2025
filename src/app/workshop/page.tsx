@@ -16,23 +16,31 @@ const ACTION =
 
 const careerPaths = [
   {
-    id: "CP1",
-    title: "Cybersecurity",
+    id: "CP_Productman",
+    title: "Product Manager",
     description:
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
     slot_remaining: 100, // link this with BE stuff, idk how lmao
     slot_max: 100,
   },
   {
-    id: "CP2",
-    title: "Product Manager",
+    id: "CP_Datsci",
+    title: "Data Science",
+    description:
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+    slot_remaining: 100, // link this with BE stuff, idk how lmao
+    slot_max: 100,
+  },
+  {
+    id: "CP_Cybersec",
+    title: "Cybersecurity",
     description:
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
     slot_remaining: 50,
     slot_max: 100,
   },
   {
-    id: "CP3",
+    id: "CP_Softeng",
     title: "Software Engineer",
     description:
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
@@ -84,7 +92,7 @@ export default function WorkshopPage() {
               {/* Make regis forms down here */}
 
               {/* Personal Info Section */}
-              <div className="space-y-6 mb-4 text-xl">
+              <div className="space-y-6 mb-4 text-m">
                 <TextInputField label="Nama Lengkap" />
                 <TextInputField label="Email Aktif" type="email" />
                 <TextInputField label="Nomor WhatsApp Aktif" type="tel" />
@@ -95,7 +103,7 @@ export default function WorkshopPage() {
 
               {/* Career Path Section */}
               <div className="mb-4 mt-8">
-                <h2 className="text-2xl font-bold tracking-tight">
+                <h2 className="text-xl font-bold tracking-tight">
                   Career Path
                 </h2>
               </div>
@@ -121,7 +129,7 @@ export default function WorkshopPage() {
 
               {/* Konfirmasi Section */}
               <div className="mt-8">
-                <h3 className="text-xl font-bold mb-4">
+                <h3 className="text-m font-bold mb-4">
                   Konfirmasi Kesediaan Mengikuti Secara Asinkron
                 </h3>
                 <div className="bg-white rounded-xl p-5 flex items-center gap-4 text-[#2247B0]">
@@ -141,7 +149,7 @@ export default function WorkshopPage() {
               </div>
 
               {/* Harapan Section */}
-              <div className="mt-8 text-xl">
+              <div className="mt-8 text-m">
                 <TextInputField label="Harapan Ke Workshop" />
               </div>
             </div>
@@ -149,7 +157,7 @@ export default function WorkshopPage() {
             <div className="-mt-3 flex justify-end">
               <Button
                 className={cn(
-                  "text-[#0D1027] text-xl hover:bg-white transition-colors border-none",
+                  "text-m text-[#0D1027] -p-0 hover:bg-white transition-colors border-none",
                   ACTION,
                 )}
               >
