@@ -10,8 +10,6 @@ interface SelectionCardProps {
   option?: string;
   title?: string;
   description?: string;
-  slot_remaining?: number;
-  slot_max?: number;
   isSelected?: boolean;
   onSelect?: () => void;
 }
@@ -20,13 +18,9 @@ export function SelectionCard({
   option = "A",
   title = "Capture The Flag",
   description = "Lorem Ipsum Dolor Sit Amet",
-  slot_remaining = 100,
-  slot_max = 100,
   isSelected = false,
   onSelect,
 }: SelectionCardProps) {
-  const isFull = slot_remaining === 0;
-
   return (
     <div
       className={cn(
@@ -44,16 +38,6 @@ export function SelectionCard({
         >
           {option}
         </div>
-        <div className="absolute right-0 top-0 font-bold text-xl mr-2 text-right">
-          {isFull ? (
-            "Penuh"
-          ) : (
-            <>
-              {" "}
-              {slot_remaining}/{slot_max} <br /> tersisa{" "}
-            </>
-          )}
-        </div>
       </div>
 
       <div className="mt-4">
@@ -66,13 +50,12 @@ export function SelectionCard({
       <div className="mt-6 flex justify-end">
         <Button
           onClick={onSelect}
-          disabled={isFull && !isSelected}
           className={cn(
             "rounded-full px-6 py-2.5 text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed",
             ACTION,
           )}
         >
-          {isSelected ? "Terpilih" : isFull ? "Tidak Tersedia" : "Pilih"}
+          {isSelected ? "Terpilih" : "Pilih"}
         </Button>
       </div>
     </div>

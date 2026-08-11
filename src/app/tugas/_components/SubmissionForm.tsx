@@ -1,74 +1,120 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { cn } from "@/lib/cn";
 
-const MAX_SIZE_MB = 5;
+const MAX_SIZE_MB = 10;
 
-export default function SubmissionForm() {
-  const [file, setFile] = useState<File | null>(null);
+/** Matches EventCard and DetailTugasCard so the whole page reads as one set. */
+const CARD = "bg-gradient-to-b from-[#9BDBFF] to-[#4A90E2]";
+const PILL =
+  "rounded-full bg-gradient-to-r from-[#2247B0] to-[#9BDBFF] px-6 py-2.5 text-sm font-bold text-white shadow-md transition hover:brightness-110";
+
+function formatSize(bytes: number) {
+  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+}
+
+type SubmissionFormProps = {
+  /** Lifted so the page's Kumpulkan button can submit the chosen file. */
+  file: File | null;
+  onFileChange: (file: File | null) => void;
+  disabled?: boolean;
+};
+
+export default function SubmissionForm({
+  file,
+  onFileChange,
+  disabled = false,
+}: SubmissionFormProps) {
   const [error, setError] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleFile = (f: File | undefined) => {
-    if (!f) return;
-    if (f.size > MAX_SIZE_MB * 1024 * 1024) {
+  function handleFile(candidate: File | undefined) {
+    if (!candidate) return;
+    if (candidate.size > MAX_SIZE_MB * 1024 * 1024) {
       setError(`Ukuran file melebihi ${MAX_SIZE_MB} MB`);
       return;
     }
     setError(null);
-    setFile(f);
-  };
+    onFileChange(candidate);
+  }
+
+  function clearFile() {
+    onFileChange(null);
+    setError(null);
+    // Without this the same file cannot be re-picked: <input type="file">
+    // fires no change event when the value is identical to last time.
+    if (inputRef.current) inputRef.current.value = "";
+  }
 
   return (
-    <section className="bg-linear-to-br from-sky-300 to-blue-500 rounded-3xl flex flex-col w-full max-w-2xl p-6 gap-4 shadow-lg">
-      <h1 className="text-blue-900 font-bold text-lg">Pengumpulan</h1>
+    <section
+      className={cn(
+        "flex w-full flex-col gap-4 rounded-3xl p-6 shadow-lg md:p-8",
+        CARD,
+      )}
+    >
+      <h2 className="text-lg font-bold text-[#0D1027] md:text-xl">
+        Pengumpulan
+      </h2>
 
       <textarea
-        placeholder="Tulis jawaban atau catatan..."
-        className="w-full h-28 rounded-2xl border-none p-4 bg-white text-sm text-blue-700 placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
+        name="catatan"
+        placeholder="Tulis Jawaban/Catatan"
+        disabled={disabled}
+        className="h-28 w-full resize-none rounded-2xl border-none bg-white p-4 text-sm text-[#0D1027] placeholder:text-blue-400 focus:ring-2 focus:ring-blue-700 focus:outline-none"
       />
 
-      <div className="bg-white border-2 border-dashed border-neutral-600 rounded-2xl flex flex-col items-center justify-center gap-4 p-10 min-h-55px">
+      {/* Hidden input drives both states; the labels/buttons below trigger it. */}
+      <input
+        ref={inputRef}
+        type="file"
+        accept="application/pdf"
+        disabled={disabled}
+        className="hidden"
+        onChange={(event) => handleFile(event.target.files?.[0])}
+      />
+
+      <div className="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-2xl bg-white p-8 text-center">
         {file ? (
           <>
-            <div className="flex flex-col items-center text-center gap-2">
-              <div className="rounded-xl px-5 py-3 w-full max-w-md">
-                <p className="text-gray-300 text-xs font-semibold tracking-wide uppercase">
-                  File dipilih
-                </p>
-                <p className="text-blue-900 text-sm font-medium mt-1">
-                  {file.name}
-                </p>
-                <p className="text-neutral-400 text-xs mt-1">
-                  {(file.size / (1024 * 1024)).toFixed(2)} MB
-                </p>
-              </div>
-              <label className="cursor-pointer bg-blue-800 hover:bg-blue-300 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition">
-                Pilih ulang
-                <input
-                  type="file"
-                  className="hidden"
-                  onChange={(e) => handleFile(e.target.files?.[0])}
-                />
-              </label>
-            </div>
+            <p className="text-sm font-bold text-[#0D1027]">
+              Lampiran Jawaban Tugas
+            </p>
+            <p className="max-w-full truncate text-sm text-blue-700">
+              {file.name}
+            </p>
+            <p className="text-xs text-neutral-500">{formatSize(file.size)}</p>
+            <button
+              type="button"
+              onClick={clearFile}
+              disabled={disabled}
+              className={PILL}
+            >
+              Hapus File
+            </button>
           </>
         ) : (
           <>
-            <p className="text-blue-900 font-bold text-lg">
+            <p className="text-base font-bold text-[#0D1027]">
               Pilih sebuah file untuk diunggah
             </p>
-            <p className="text-blue-300 text-sm -mt-2">
+            <p className="text-sm text-neutral-500">
               Unggah satu file dengan ukuran maksimal {MAX_SIZE_MB} MB
             </p>
-            {error && <p className="text-red-500 text-xs">{error}</p>}
-            <label className="cursor-pointer bg-blue-900 hover:bg-blue-300 text-white text-sm font-semibold px-5 py-2.5 rounded-lg flex items-center gap-2 transition">
+            {error ? (
+              <p role="alert" className="text-xs font-medium text-red-600">
+                {error}
+              </p>
+            ) : null}
+            <button
+              type="button"
+              onClick={() => inputRef.current?.click()}
+              disabled={disabled}
+              className={PILL}
+            >
               Unggah dokumen
-              <input
-                type="file"
-                className="hidden"
-                onChange={(e) => handleFile(e.target.files?.[0])}
-              />
-            </label>
+            </button>
           </>
         )}
       </div>

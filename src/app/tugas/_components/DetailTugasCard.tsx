@@ -25,38 +25,40 @@ export default function DetailTugasCard({
   attachments = [],
 }: DetailTugasCardProps) {
   return (
-    <section className="w-full max-w-4xl rounded-2xl border border-[#bec8cf]/50 bg-[#D4D2E3] p-5 shadow-sm sm:p-8">
+    <section className="w-full rounded-3xl bg-gradient-to-b from-[#9BDBFF] to-[#4A90E2] p-6 shadow-lg sm:p-8">
       <div className="mb-2">
-        <h1 className="text-2xl font-bold uppercase tracking-wide text-[#5D5A88]">
+        <h1 className="text-2xl font-bold uppercase tracking-wide text-[#0D1027]">
           {title}
         </h1>
       </div>
 
-      <div className="h-px bg-[#9795B5]" />
+      <div className="h-px bg-white/50" />
 
       <dl className="my-4 grid grid-cols-1 gap-5 md:grid-cols-2">
         <div className="flex flex-col gap-1">
-          <dt className="text-xs font-medium uppercase tracking-wide text-[#3e484e]">
+          <dt className="text-xs font-medium uppercase tracking-wide text-[#0D1027]/80">
             Tanggal Rilis :
           </dt>
-          <dd className="text-base font-medium text-[#181c1f]">
+          <dd className="text-base font-medium text-white underline">
             {releaseDate}
           </dd>
         </div>
 
         <div className="flex flex-col gap-1">
-          <dt className="text-xs font-medium uppercase tracking-wide text-[#3e484e]">
+          <dt className="text-xs font-medium uppercase tracking-wide text-[#0D1027]/80">
             Tanggal Tenggat :
           </dt>
-          <dd className="text-base font-medium text-[#ba1a1a]">{dueDate}</dd>
+          <dd className="text-base font-medium text-[#FFD1D1] underline">
+            {dueDate}
+          </dd>
         </div>
       </dl>
 
-      <div className="h-px bg-[#9795B5]" />
+      <div className="h-px bg-white/50" />
 
       <div className="my-4">
-        <h2 className="mb-2 text-xl font-bold text-[#5D5A88]">Deskripsi</h2>
-        <div className="text-sm leading-6 text-[#181c1f]">
+        <h2 className="mb-2 text-xl font-bold text-[#0D1027]">Deskripsi</h2>
+        <div className="text-sm leading-6 text-white">
           <p>{description}</p>
 
           {points.length > 0 ? (
@@ -70,7 +72,7 @@ export default function DetailTugasCard({
       </div>
 
       <div className="mt-4">
-        <h2 className="mb-2 text-xl font-bold text-[#5D5A88]">Lampiran</h2>
+        <h2 className="mb-2 text-xl font-bold text-[#0D1027]">Lampiran</h2>
 
         {attachments.length > 0 ? (
           <div className="flex flex-wrap gap-4">
