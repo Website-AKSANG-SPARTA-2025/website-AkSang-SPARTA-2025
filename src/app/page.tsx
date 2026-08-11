@@ -1,7 +1,14 @@
 import React from "react";
 import EventCard from "./_components/EventCard";
+import CountdownTimer from "@/components/countdown-timer";
 
 export default function LandingPage() {
+  const targetDate = new Date(2026, 7, 12, 8, 30, 0);
+  const initialSeconds = Math.max(
+    0,
+    Math.floor((targetDate.getTime() - Date.now()) / 1000),
+  );
+
   return (
     <main className="relative min-h-screen bg-[#0D1027] overflow-hidden text-white font-sans">
       {/* ========================================================= */}
@@ -130,37 +137,9 @@ export default function LandingPage() {
         {/* ========================================================= */}
         {/* KOTAK COUNTDOWN TIMER (HANYA VERSI AEGIS YANG TERSISA) */}
         {/* ========================================================= */}
-        <section className="flex items-center justify-center gap-4 md:gap-[32px] w-full mt-24 relative z-10 px-4">
-          {[
-            { label: "Hari", value: "00" },
-            { label: "Jam", value: "00" },
-            { label: "Menit", value: "00" },
-            { label: "Detik", value: "00" },
-          ].map((item, index) => (
-            <div
-              key={index}
-              className="flex flex-col items-center gap-[12px] md:gap-[20px] w-auto md:w-[159px]"
-            >
-              {/* Box Gradient Light Blue Aegis */}
-              <div className="w-[70px] h-[75px] md:w-[159px] md:h-[170px] rounded-[12px] md:rounded-[24px] flex items-center justify-center border border-[#FFFFFF] bg-gradient-to-b from-[#9BDBFF] to-[#D8F1FF] shadow-lg">
-                <span
-                  className="text-[#0D1027] font-bold text-[20px] md:text-[36px] leading-tight md:leading-[46px]"
-                  style={{ fontFamily: "var(--font-science-gothic)" }}
-                >
-                  {item.value}
-                </span>
-              </div>
-
-              {/* Teks Label Bawah */}
-              <span
-                className="text-[#FFFFFF] font-bold text-[12px] md:text-[24px] leading-tight md:leading-[34px] tracking-wide"
-                style={{ fontFamily: "var(--font-science-gothic)" }}
-              >
-                {item.label}
-              </span>
-            </div>
-          ))}
-        </section>
+        <div className="mt-24 flex justify-center">
+          <CountdownTimer initialSeconds={initialSeconds} />
+        </div>
 
         {/* 3. EVENTS SECTION - AEGIS THEME */}
         <section className="mt-24 md:mt-32 flex flex-col items-center w-full relative z-10">
