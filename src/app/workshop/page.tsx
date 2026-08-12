@@ -1,91 +1,68 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
+import Navbar from "@/components/Navbar"; // unused too
+import Footer from "@/components/Footer"; // this too
 import { SelectionCard } from "./_components/selection-card";
+import { FinalisasiPilihanCard } from "./_components/finalisasi-pilihan-card"; // unused rn
 import { cn } from "@/lib/cn";
 import { Checkbox } from "@/components/ui/checkbox";
 import TextInputField from "@/components/TextInputField";
 import { Button } from "@/components/ui/button";
-import { enrollWorkshop, type CompetitionPath } from "@/api/workshops";
-import { useSubmit } from "@/utils/use-submit";
 
+const SURFACE = "bg-[#5d5a88]"; // what was this for? I forgot
 const ACTION =
   "bg-gradient-to-r from-[#2247B0] to-[#9BDBFF] hover:brightness-110";
 
-/**
- * ids are the CompetitionPath enum values the API accepts — see
- * competitionPathSchema in src/schemas, the Prisma enum, and the
- * WORKSHOP_*_COMMUNITY_LINK env vars that invitationUrlForPath reads. They go
- * on the wire verbatim, so do not replace them with friendly strings.
- */
-const competitionPaths = [
+const careerPaths = [
   {
-    id: "CTF",
+    id: "CP_Productman",
     option: "A",
-    title: "Capture The Flag",
+    title: "Product Manager",
     description:
-      "Uji ketajamanmu menaklukkan tantangan keamanan siber. Kuasai teknik eksploitasi, kriptografi, dan forensik digital untuk menemukan setiap flag yang tersembunyi.",
+      // "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+      "Jadilah pemimpin di balik produk digital yang sukses. Pelajari cara memadukan strategi bisnis, kebutuhan pengguna, dan teknologi untuk menciptakan solusi yang tepat sasaran.",
+    slot_remaining: 100, // link this with BE stuff, idk how lmao
+    slot_max: 100,
   },
   {
-    id: "BCC",
+    id: "CP_Datsci",
     option: "B",
-    title: "Business Case Competition",
+    title: "Data Science",
     description:
-      "Pecahkan permasalahan bisnis nyata dengan analisis yang tajam. Susun strategi, rancang solusi, dan presentasikan idemu secara meyakinkan di hadapan dewan juri.",
+      // "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+      "Jelajahi dunia di balik data. Temukan pola tersembunyi menggunakan statistik dan kecerdasan buatan (AI) untuk membantu pengambilan keputusan yang strategis.",
+    slot_remaining: 100, // link this with BE stuff, idk how lmao
+    slot_max: 100,
   },
   {
-    id: "CP",
+    id: "CP_Cybersec",
     option: "C",
-    title: "Competitive Programming",
+    title: "Cybersecurity",
     description:
-      "Asah logika dan kecepatan berpikirmu lewat pemrograman kompetitif. Kuasai algoritma dan struktur data untuk menyelesaikan persoalan dalam batas waktu yang ketat.",
+      // "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+      "Jadilah garda terdepan pelindung dunia digital. Kuasai teknik pertahanan sistem, analisis kerentanan, dan lindungi data pengguna dari berbagai ancaman siber.",
+    slot_remaining: 50,
+    slot_max: 100,
   },
-] satisfies ReadonlyArray<{
-  id: CompetitionPath;
-  option: string;
-  title: string;
-  description: string;
-}>;
+  {
+    id: "CP_Softeng",
+    option: "D",
+    title: "Software Engineer",
+    description:
+      "Rancang, bangun, dan pelihara perangkat lunak berkualitas. Pelajari bagaimana mengubah barisan kode menjadi aplikasi dan sistem yang digunakan oleh jutaan orang.",
+    slot_remaining: 0,
+    slot_max: 20,
+  },
+];
 
 // yes this is vibecoded, gomenasai!
 
 export default function WorkshopPage() {
-  const [selectedPath, setSelectedPath] = useState<CompetitionPath | null>(
+  const [selectedCompetition, setSelectedCompetition] = useState<string | null>(
     null,
   );
-  const { state, run, fail, submitting } = useSubmit();
-
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    if (!selectedPath) {
-      fail("Pilih salah satu competition path.");
-      return;
-    }
-
-    const form = new FormData(event.currentTarget);
-    const nim = String(form.get("nim") ?? "").trim();
-
-    void run(async () => {
-      // Only these five keys may be sent — createWorkshopEnrollmentSchema is
-      // .strict(), so anything extra fails validation rather than being
-      // ignored. The other inputs on this form are not part of the contract.
-      const result = await enrollWorkshop({
-        name: String(form.get("name") ?? "").trim(),
-        email: String(form.get("email") ?? "").trim(),
-        competitionPath: selectedPath,
-        phoneNumber: String(form.get("phoneNumber") ?? "").trim(),
-        ...(nim ? { nim } : {}),
-      });
-
-      return (
-        result.message ??
-        (result.status === 202
-          ? "Cek emailmu untuk verifikasi."
-          : "Pendaftaran tercatat.")
-      );
-    });
-  }
+  const [selectedCareer, setSelectedCareer] = useState<string | null>(null);
 
   return (
     <>
@@ -107,156 +84,93 @@ export default function WorkshopPage() {
                 Form Pendaftaran Workshop
               </h1>
               <p className="text-sm md:text-base text-white/90">
-                Silakan lengkapi formulir di bawah ini dengan data yang valid
-                untuk mencatatkan kehadiranmu dalam rangkaian kegiatan Aksi
-                Angkatan SPARTA 2025: AI for Impact.
+                Ayo daftar workshop Aksi Angkatan SPARTA 2025: AI for Impact!
+                Dapatkan pembelajaran berharga dari pemateri berpengalaman dan
+                dapatkan kesempatan untuk mengerjakan tugas dan mendapatkan
+                feedback dari ahlinya.
               </p>
             </div>
 
-            <form onSubmit={handleSubmit}>
-              <div
+            <div
+              className={cn(
+                "rounded-3xl p-6 md:p-8 text-white shadow-xl bg-gradient-to-b from-[#2247B0] via-[#79CCFD] to-[#2247B0]",
+              )}
+            >
+              {/* Make regis forms down here */}
+
+              {/* Personal Info Section */}
+              <div className="space-y-6 mb-4 text-m text-white">
+                <TextInputField label="Nama Lengkap" />
+                <TextInputField label="Email Aktif" type="email" />
+                <TextInputField label="Nomor WhatsApp Aktif" type="tel" />
+                <TextInputField label="Asal Universitas/Sekolah" />
+                <TextInputField label="Program Studi/Jurusan" />
+                <TextInputField label="Angkatan/Tahun Masuk Universitas" />
+              </div>
+
+              {/* Career Path Section */}
+              <div className="mb-4 mt-8">
+                <h2 className="text-xl font-bold tracking-tight">
+                  Career Path
+                </h2>
+              </div>
+
+              <div className="space-y-6">
+                {careerPaths.map((career) => (
+                  <SelectionCard
+                    key={career.id}
+                    option={career.option}
+                    title={career.title}
+                    description={career.description}
+                    slot_remaining={career.slot_remaining}
+                    slot_max={career.slot_max}
+                    isSelected={selectedCareer === career.id}
+                    onSelect={() =>
+                      setSelectedCareer(
+                        career.id === selectedCareer ? null : career.id,
+                      )
+                    }
+                  />
+                ))}
+              </div>
+
+              {/* Konfirmasi Section */}
+              <div className="mt-8">
+                <h3 className="text-m font-bold mb-4">
+                  Konfirmasi Kesediaan Mengikuti Secara Asinkron
+                </h3>
+                <div className="bg-white rounded-xl p-5 flex items-center gap-4 text-[#2247B0]">
+                  <div className="w-6 h-6 rounded-[6px] p-[3px] bg-gradient-to-r from-[#2247B0] to-[#9BDAFF] shrink-0">
+                    <Checkbox
+                      id="bersedia"
+                      className="w-full h-full !border-0 bg-white data-checked:!bg-transparent data-[state=checked]:!bg-transparent text-white rounded-[4px]"
+                    />
+                  </div>
+                  <label
+                    htmlFor="bersedia"
+                    className="font-bold text-lg cursor-pointer"
+                  >
+                    Bersedia
+                  </label>
+                </div>
+              </div>
+
+              {/* Harapan Section */}
+              <div className="mt-8 text-m">
+                <TextInputField label="Harapan Ke Workshop" />
+              </div>
+            </div>
+            {/* Submit Button */}
+            <div className="-mt-3 flex justify-end">
+              <Button
                 className={cn(
-                  "rounded-3xl p-6 md:p-8 text-white shadow-xl bg-gradient-to-b from-[#2247B0] via-[#79CCFD] to-[#2247B0]",
+                  "text-m text-[#0D1027] -p-0 hover:bg-white transition-colors border-none",
+                  ACTION,
                 )}
               >
-                {/*
-                  Only name, email, phoneNumber and nim reach the API. The
-                  university/major/year/harapan inputs are collected for the
-                  organisers but are NOT part of createWorkshopEnrollmentSchema,
-                  which is .strict() and would reject them.
-                */}
-                <div className="space-y-6 mb-4 text-m text-white">
-                  <TextInputField
-                    label="Nama Lengkap"
-                    name="name"
-                    minLength={2}
-                    maxLength={100}
-                    required
-                    disabled={submitting}
-                  />
-                  <TextInputField
-                    label="Email Aktif"
-                    name="email"
-                    type="email"
-                    required
-                    disabled={submitting}
-                  />
-                  <TextInputField
-                    label="Nomor WhatsApp Aktif"
-                    name="phoneNumber"
-                    type="tel"
-                    inputMode="tel"
-                    // Mirrors phoneNumberSchema: ^\+?[0-9]{8,20}$
-                    pattern="\+?[0-9]{8,20}"
-                    title="8-20 digit, boleh diawali +"
-                    required
-                    disabled={submitting}
-                  />
-                  <TextInputField
-                    label="NIM (opsional)"
-                    name="nim"
-                    disabled={submitting}
-                  />
-                  <TextInputField
-                    label="Asal Universitas/Sekolah"
-                    disabled={submitting}
-                  />
-                  <TextInputField
-                    label="Program Studi/Jurusan"
-                    disabled={submitting}
-                  />
-                  <TextInputField
-                    label="Angkatan/Tahun Masuk Universitas"
-                    disabled={submitting}
-                  />
-                </div>
-
-                {/* Competition Path Section */}
-                <div className="mb-4 mt-8">
-                  <h2 className="text-xl font-bold tracking-tight">
-                    Competition Path
-                  </h2>
-                </div>
-
-                <div className="space-y-6">
-                  {competitionPaths.map((path) => (
-                    <SelectionCard
-                      key={path.id}
-                      option={path.option}
-                      title={path.title}
-                      description={path.description}
-                      isSelected={selectedPath === path.id}
-                      onSelect={() =>
-                        setSelectedPath(
-                          path.id === selectedPath ? null : path.id,
-                        )
-                      }
-                    />
-                  ))}
-                </div>
-
-                {/* Konfirmasi Section */}
-                <div className="mt-8">
-                  <h3 className="text-m font-bold mb-4">
-                    Konfirmasi Kesediaan Mengikuti Secara Asinkron
-                  </h3>
-                  <div className="bg-white rounded-xl p-5 flex items-center gap-4 text-[#2247B0]">
-                    <div className="w-6 h-6 rounded-[6px] p-[3px] bg-gradient-to-r from-[#2247B0] to-[#9BDAFF] shrink-0">
-                      <Checkbox
-                        id="bersedia"
-                        className="w-full h-full !border-0 bg-white data-checked:!bg-transparent data-[state=checked]:!bg-transparent text-white rounded-[4px]"
-                      />
-                    </div>
-                    <label
-                      htmlFor="bersedia"
-                      className="font-bold text-lg cursor-pointer"
-                    >
-                      Bersedia
-                    </label>
-                  </div>
-                </div>
-
-                {/* Harapan Section */}
-                <div className="mt-8 text-m">
-                  <TextInputField
-                    label="Harapan Ke Workshop"
-                    disabled={submitting}
-                  />
-                </div>
-              </div>
-
-              {state.kind === "error" ? (
-                <p
-                  role="alert"
-                  className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
-                >
-                  {state.message}
-                </p>
-              ) : null}
-
-              {state.kind === "success" ? (
-                <p
-                  role="status"
-                  className="mt-4 rounded-xl bg-green-50 px-4 py-3 text-sm font-medium text-green-800"
-                >
-                  {state.message}
-                </p>
-              ) : null}
-
-              {/* Submit Button */}
-              <div className="mt-6 flex justify-end">
-                <Button
-                  type="submit"
-                  disabled={submitting}
-                  className={cn(
-                    "text-m text-[#0D1027] -p-0 hover:bg-white transition-colors border-none disabled:opacity-60",
-                    ACTION,
-                  )}
-                >
-                  {submitting ? "Mengirim..." : "Daftar Workshop →"}
-                </Button>
-              </div>
-            </form>
+                Daftar Workshop &rarr;
+              </Button>
+            </div>
           </div>
         </div>
       </div>
