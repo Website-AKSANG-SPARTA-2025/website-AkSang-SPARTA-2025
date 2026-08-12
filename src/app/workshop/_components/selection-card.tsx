@@ -12,11 +12,13 @@ interface SelectionCardProps {
   description?: string;
   isSelected?: boolean;
   onSelect?: () => void;
+  slot_remaining: number; // Tambahkan baris ini
+  slot_max: number; // Tambahkan baris ini juga
 }
 
 export function SelectionCard({
   option = "A",
-  title = "Capture The Flag",
+  title = "Software Engineering",
   description = "Lorem Ipsum Dolor Sit Amet",
   isSelected = false,
   onSelect,
