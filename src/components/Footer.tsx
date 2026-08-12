@@ -21,6 +21,7 @@ const SOCIALS = [
 
 const LINKS = [
   { label: "Home", href: "/" },
+  { label: "Events", href: "/#events" },
   { label: "Workshop", href: "/workshop" },
   { label: "Presensi", href: "/presensi" },
 ] as const;

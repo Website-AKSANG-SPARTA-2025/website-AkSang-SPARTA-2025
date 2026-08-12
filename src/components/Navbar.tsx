@@ -33,7 +33,15 @@ export default function Navbar() {
           >
             Presensi
           </Link>
-          {/* <div className="flex items-center gap-1 cursor-pointer hover:text-blue-300 transition-colors group relative">
+          {/*
+            Scrolls to the Events section on the landing page rather than a
+            /events route, which does not exist. The leading "/" makes it work
+            from any page: navigate home first, then jump to the anchor.
+          */}
+          <Link
+            href="/#events"
+            className="flex items-center gap-1 hover:text-blue-300 transition-colors"
+          >
             <span>Events</span>
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -49,7 +57,7 @@ export default function Navbar() {
             >
               <path d="m6 9 6 6 6-6" />
             </svg>
-          </div> */}
+          </Link>
           <Link
             href="/workshop"
             className="hover:text-blue-300 transition-colors"
@@ -91,24 +99,28 @@ export default function Navbar() {
         <div className="md:hidden absolute top-full left-0 w-full bg-[#110B29] border-t border-white/10 flex flex-col p-4 shadow-xl">
           <Link
             href="/"
+            onClick={() => setIsMobileMenuOpen(false)}
             className="px-4 py-3 hover:bg-white/5 rounded-lg transition-colors"
           >
             Home
           </Link>
           <Link
             href="/presensi"
+            onClick={() => setIsMobileMenuOpen(false)}
             className="px-4 py-3 hover:bg-white/5 rounded-lg transition-colors"
           >
             Presensi
           </Link>
-          {/* <Link
-            href="/events"
+          <Link
+            href="/#events"
+            onClick={() => setIsMobileMenuOpen(false)}
             className="px-4 py-3 hover:bg-white/5 rounded-lg transition-colors"
           >
             Events
-          </Link> */}
+          </Link>
           <Link
             href="/workshop"
+            onClick={() => setIsMobileMenuOpen(false)}
             className="px-4 py-3 hover:bg-white/5 rounded-lg transition-colors"
           >
             Workshop

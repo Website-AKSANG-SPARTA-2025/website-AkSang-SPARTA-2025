@@ -1,8 +1,8 @@
 import React from "react";
 import Image from "next/image";
+import Link from "next/link";
 import EventCard from "./_components/EventCard";
 import CountdownTimer from "@/components/countdown-timer";
-import Link from "next/link";
 
 export default function LandingPage() {
   const targetDate = new Date(2026, 7, 12, 8, 30, 0);
@@ -166,7 +166,10 @@ export default function LandingPage() {
         </div>
 
         {/* 3. EVENTS SECTION - AEGIS THEME */}
-        <section className="mt-24 md:mt-32 flex flex-col items-center w-full relative z-10">
+        <section
+          id="events"
+          className="mt-24 md:mt-32 flex flex-col items-center w-full relative z-10 scroll-mt-28"
+        >
           <h2
             className="text-[#FFFFFF] font-bold text-[40px] md:text-[50px] leading-tight md:leading-[30px] tracking-wide mb-10 md:mb-16 uppercase drop-shadow-lg"
             style={{ fontFamily: "var(--font-science-gothic)" }}
@@ -180,7 +183,7 @@ export default function LandingPage() {
               description="Kembangkan potensimu menjadi kemampuan teknis yang nyata melalui praktik dan pemecahan masalah."
               buttonText="Daftar Workshop"
               iconSrc="/logo_workshop.png"
-              href="/workshop" // <--- PASTIKAN BARIS INI DITAMBAHKAN
+              href="/workshop"
             />
 
             <EventCard
@@ -188,7 +191,7 @@ export default function LandingPage() {
               description="Catat kehadiranmu di sini untuk memvalidasi partisipasiMU dalam rangkaian acara!"
               buttonText="Presensi"
               iconSrc="/logo_presensi.png"
-              href="/presensi" // <--- PASTIKAN BARIS INI DITAMBAHKAN
+              href="/presensi"
             />
           </div>
         </section>
@@ -197,7 +200,7 @@ export default function LandingPage() {
         {/* No bottom padding: the footer's own top fade supplies that gap. */}
         <section
           id="tentang-kami"
-          className="mt-24 md:mt-32 flex flex-col items-center w-full relative z-10"
+          className="mt-24 md:mt-32 flex flex-col items-center w-full relative z-10 scroll-mt-28"
         >
           {/*
             Side robot peeking in from the right, straddling the gap between the

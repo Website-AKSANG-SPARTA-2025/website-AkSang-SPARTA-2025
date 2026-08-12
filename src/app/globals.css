@@ -191,4 +191,16 @@ body {
   html {
     @apply font-sans;
   }
+
+  /*
+   * Smooth scrolling for in-page anchors (#events, #tentang-kami). Native
+   * rather than a JS handler, so it also applies to keyboard navigation and
+   * back/forward restoration. Sections carry scroll-mt-* so the sticky navbar
+   * does not cover the heading on arrival.
+   */
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
 }

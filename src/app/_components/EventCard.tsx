@@ -1,13 +1,14 @@
 import React from "react";
 import Image from "next/image";
-import Link from "next/link"; // Wajib di-import agar bisa pindah halaman
+import Link from "next/link";
 
 interface EventCardProps {
   title: string;
   description: string;
   buttonText: string;
   iconSrc: string;
-  href: string; // Wajib ditambahkan di sini
+  /** Where the card's button goes, e.g. /workshop */
+  href: string;
 }
 
 export default function EventCard({
@@ -52,9 +53,8 @@ export default function EventCard({
         </p>
       </div>
 
-      {/* Ini adalah bagian yang membuat tombol bisa di-klik pindah halaman */}
       <Link
-        href={href || "#"}
+        href={href}
         className="mt-8 px-[36px] py-[24px] h-[70px] bg-gradient-to-b from-[#9BDBFF] to-[#FFFFFF] hover:scale-105 rounded-[40px] flex items-center justify-center gap-[8px] transition-all shadow-[0_4px_20px_rgba(155,218,255,0.4)] relative z-10"
       >
         <span
