@@ -50,7 +50,7 @@ export default function TugasContent() {
   }
 
   return (
-    <div className="relative isolate flex min-h-screen flex-col overflow-x-hidden pt-16 pb-16">
+    <div className="relative isolate flex min-h-screen flex-col overflow-x-clip pt-16 pb-16">
       {/* Base space background, same treatment as /presensi */}
       <div className="fixed inset-0 -z-20 bg-[#0D1027]">
         <div className="absolute inset-0 bg-[url('/starry_bg.jpg')] bg-cover bg-center opacity-80" />
@@ -86,7 +86,7 @@ export default function TugasContent() {
 
           {/*
             Side robot peeking past the card's right edge, as in the mockup.
-            The page is overflow-x-hidden, so the overhang crops cleanly.
+            The page is overflow-x-clip, so the overhang crops cleanly.
           */}
           <Image
             src="/robot_samping.png"

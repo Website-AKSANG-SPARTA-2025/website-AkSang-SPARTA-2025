@@ -41,7 +41,7 @@ export default function PresensiPage() {
   }
 
   return (
-    <div className="relative isolate min-h-screen flex flex-col pt-32 pb-16 overflow-x-hidden">
+    <div className="relative isolate min-h-screen flex flex-col pt-32 pb-16 overflow-x-clip">
       {/* Base Space Background */}
       <div className="fixed inset-0 -z-20 bg-[#0D1027]">
         <div className="absolute inset-0 bg-[url('/starry_bg.jpg')] bg-cover bg-center opacity-80"></div>

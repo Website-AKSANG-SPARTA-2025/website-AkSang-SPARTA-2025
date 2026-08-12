@@ -11,8 +11,13 @@ export default function LandingPage() {
     Math.floor((targetDate.getTime() - Date.now()) / 1000),
   );
 
+  // overflow-x-clip on <main>, NOT overflow-hidden. `hidden` makes the element
+  // a scroll container, so an in-page anchor (#events, #tentang-kami) scrolls
+  // <main> instead of the document — and because `hidden` blocks user
+  // scrolling, the page then cannot be scrolled back up. `clip` crops the
+  // decorations that bleed off the right edge without creating a scrollport.
   return (
-    <main className="relative min-h-screen bg-[#0D1027] overflow-hidden text-white font-sans">
+    <main className="relative min-h-screen bg-[#0D1027] overflow-x-clip text-white font-sans">
       {/*
         Viewport-wide base colour, same pattern as /presensi. <main>'s own
         bg stops where <main> does, but the footer's background image fades to
@@ -205,7 +210,7 @@ export default function LandingPage() {
           {/*
             Side robot peeking in from the right, straddling the gap between the
             Events buttons and this heading. Deliberately overflows the right
-            edge — <main> is overflow-hidden, which produces the cropped look.
+            edge — <main> is overflow-x-clip, which produces the cropped look.
             Shown at both breakpoints, unlike the planet/galaxy decorations.
           */}
           <Image
