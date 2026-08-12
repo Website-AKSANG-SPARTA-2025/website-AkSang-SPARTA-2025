@@ -15,6 +15,7 @@ export default function CountdownTimer({
   className,
 }: CountdownTimerProps) {
   const [timeLeft, setTimeLeft] = useState<number>(initialSeconds);
+  const clampedTimeLeft = Math.max(timeLeft, 0);
 
   useEffect(() => {
     // Stop the timer when it reaches zero
@@ -27,7 +28,7 @@ export default function CountdownTimer({
 
     // Set up the interval to decrease the time every 1000ms (1 second)
     const timerId = setInterval(() => {
-      setTimeLeft((prev) => prev - 1);
+      setTimeLeft((prev) => Math.max(prev - 1, 0));
     }, 1000);
 
     // Cleanup the interval when the component unmounts or time changes
@@ -79,7 +80,7 @@ export default function CountdownTimer({
             className,
           )}
         >
-          {formatDays(timeLeft)}
+          {formatDays(clampedTimeLeft)}
         </div>
         <div className="h-[34px] w-[159px] text-center font-['Science_Gothic'] text-[24px] font-bold leading-[34px] tracking-[0px] text-[#FFFFFF]">
           Days
@@ -93,7 +94,7 @@ export default function CountdownTimer({
             className,
           )}
         >
-          {formatHours(timeLeft)}
+          {formatHours(clampedTimeLeft)}
         </div>
         <div className="h-[34px] w-[159px] text-center font-['Science_Gothic'] text-[24px] font-bold leading-[34px] tracking-[0px] text-[#FFFFFF]">
           Hours
@@ -107,7 +108,7 @@ export default function CountdownTimer({
             className,
           )}
         >
-          {formatMinutes(timeLeft)}
+          {formatMinutes(clampedTimeLeft)}
         </div>
         <div className="h-[34px] w-[159px] text-center font-['Science_Gothic'] text-[24px] font-bold leading-[34px] tracking-[0px] text-[#FFFFFF]">
           Minutes
@@ -121,7 +122,7 @@ export default function CountdownTimer({
             className,
           )}
         >
-          {formatSeconds(timeLeft)}
+          {formatSeconds(clampedTimeLeft)}
         </div>
         <div className="h-[34px] w-[159px] text-center font-['Science_Gothic'] text-[24px] font-bold leading-[34px] tracking-[0px] text-[#FFFFFF]">
           Seconds
